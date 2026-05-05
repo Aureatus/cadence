@@ -47,7 +47,7 @@ test("creates a cyclic todo, completes an occurrence, and persists collection da
 }) => {
   await openApp(page, "/", baseNow);
 
-  await expect(page.getByRole("heading", { name: /Cycle / })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "The day is turning." })).toBeVisible();
   await expect(page.getByText("No active cadences yet")).toBeVisible();
 
   await page.getByLabel("Task").fill("Hydration pulse");

@@ -23,16 +23,17 @@ import {
   nowIso,
 } from "./time";
 
-const pageShell = "mx-auto min-h-svh w-full max-w-6xl px-4 py-4 sm:px-6 lg:py-6";
-const panel = "border bg-card text-card-foreground shadow-sm";
-const eyebrow = "font-mono text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground";
 const field =
-  "min-h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50";
-const label = "grid gap-2 text-sm font-medium text-muted-foreground";
+  "tide-field min-h-10 w-full rounded-none border-0 border-b bg-transparent px-0 py-2 text-sm shadow-none outline-none transition-colors placeholder:text-[color:rgba(216,229,225,0.38)] focus-visible:ring-0";
+const label = "grid gap-2 text-sm font-medium text-[color:var(--foam)]";
+const statText = "font-mono text-[10px] uppercase tracking-[0.24em] text-[color:var(--foam)]/60";
+let isCreatingSettings = false;
 let isCreatingInitialCycle = false;
+let isSeedingDevCadences = false;
 
 type DashboardStats = {
   orderedTodos: Array<Todo>;
+  cycleTodos: Array<Todo>;
   activeCount: number;
   completedCount: number;
   skippedCount: number;
@@ -53,6 +54,8 @@ type TodoRuleFieldsProps = {
   setGraceMinutes: (value: number) => void;
 };
 
+type DueState = ReturnType<typeof getDueState>;
+
 export function RootLayout() {
   const { data: settings } = useLiveQuery(settingsCollection);
 
@@ -60,8 +63,8 @@ export function RootLayout() {
   useApplyTheme(settings);
 
   return (
-    <main className={pageShell}>
-      <header className="sticky top-4 z-10 mb-5 flex flex-col gap-3 rounded-full border bg-background/85 p-2 shadow-sm backdrop-blur md:flex-row md:items-center md:justify-between">
+    <main className="page">
+      <header className="mast">
         <BrandLink />
         <PrimaryNav />
       </header>
@@ -72,9 +75,10 @@ export function RootLayout() {
 
 function useEnsureSettings(settings: Array<Settings>) {
   useEffect(() => {
-    if (!settings.some((entry) => entry.id === "settings")) {
-      settingsCollection.insert({ id: "settings", theme: "system" });
-    }
+    if (settings.some((entry) => entry.id === "settings") || isCreatingSettings) return;
+
+    isCreatingSettings = true;
+    settingsCollection.insert({ id: "settings", theme: "system" });
   }, [settings]);
 }
 
@@ -98,19 +102,11 @@ function useApplyTheme(settings: Array<Settings>) {
 
 function BrandLink() {
   return (
-    <Link
-      to="/"
-      className="flex items-center gap-3 rounded-full px-2 text-foreground no-underline"
-      aria-label="Cadence home"
-    >
-      <span className="grid size-12 place-items-center rounded-full bg-primary text-sm font-black tracking-tighter text-primary-foreground">
-        ca
-      </span>
-      <span className="leading-tight">
-        <strong className="block font-heading text-sm tracking-tight">Cadence</strong>
-        <small className="hidden text-xs text-muted-foreground sm:block">
-          Local-first cadence tracker
-        </small>
+    <Link to="/" className="brand no-underline" aria-label="Cadence home">
+      <span className="moon-mark" aria-hidden="true" />
+      <span>
+        <span className="brand-name">Cadence</span>
+        <span className="brand-tag">small tides, kept</span>
       </span>
     </Link>
   );
@@ -118,23 +114,22 @@ function BrandLink() {
 
 function PrimaryNav() {
   const links = [
-    { to: "/", label: "Today" },
-    { to: "/history", label: "History" },
-    { to: "/settings", label: "Settings" },
+    { to: "/", label: "Today", num: "i" },
+    { to: "/history", label: "History", num: "ii" },
+    { to: "/settings", label: "Settings", num: "iii" },
   ];
 
   return (
-    <nav className="grid grid-cols-3 gap-1" aria-label="Primary navigation">
+    <nav className="nav" aria-label="Primary navigation">
       {links.map((item) => (
         <Link
           key={item.to}
           to={item.to}
-          className="rounded-full px-4 py-2 text-center text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          activeProps={{
-            className:
-              "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
-          }}
+          className="tab"
+          activeProps={{ className: "tab on" }}
+          activeOptions={{ exact: item.to === "/" }}
         >
+          <span className="num">{item.num}</span>
           {item.label}
         </Link>
       ))}
@@ -150,100 +145,294 @@ export function Dashboard() {
 
   useEffect(() => {
     ensureActiveCycle(activeCycle);
-  }, [activeCycle]);
+    seedDevCadences(activeCycle, stats.cycleTodos.length > 0);
+  }, [activeCycle, stats.cycleTodos.length]);
 
-  if (!activeCycle) {
-    return (
-      <section className={cn(panel, "rounded-3xl p-8")}>Preparing your first cycle...</section>
-    );
-  }
+  if (!activeCycle)
+    return <section className="tide-panel p-8">Preparing your first cycle...</section>;
 
   return (
     <>
-      <DashboardHero cycle={activeCycle} score={stats.score} />
-      <CycleMetrics stats={stats} />
-      <CurrentCycleWorkspace cycle={activeCycle} todos={stats.orderedTodos} />
+      <DashboardHero cycle={activeCycle} />
+      <TideStage cycle={activeCycle} stats={stats} />
+      <CurrentCycleWorkspace cycle={activeCycle} stats={stats} />
     </>
   );
 }
 
-function DashboardHero({ cycle, score }: { cycle: Cycle; score: number }) {
+function DashboardHero({ cycle }: { cycle: Cycle }) {
+  const today = new Date();
+
   return (
-    <section
-      className={cn(
-        panel,
-        "grid gap-8 rounded-3xl p-6 md:grid-cols-[1fr_auto] md:items-end lg:p-12",
-      )}
-    >
-      <div>
-        <p className={eyebrow}>Active cycle</p>
-        <h1 className="mt-3 max-w-xl font-heading text-5xl font-semibold tracking-tight text-balance md:text-7xl lg:text-8xl">
-          {cycle.title}
-        </h1>
-        <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
-          Recurring tasks stay active. Completing one occurrence schedules the next one and records
-          how close you were to the ideal cadence.
-        </p>
+    <section className="hero">
+      <h1 className="display">
+        The day is <em>turning</em>.
+      </h1>
+      <div className="meta">
+        {today.toLocaleDateString([], { weekday: "long" })} ·{" "}
+        <b>{today.toLocaleDateString([], { day: "numeric", month: "long" })}</b>
+        <br />
+        Cycle <b>{cycle.title}</b>
+        <br />
+        Local-first · <b>offline ready</b>
       </div>
-      <ScoreOrb score={score} />
     </section>
   );
 }
 
-function ScoreOrb({ score }: { score: number }) {
+function TideStage({ cycle, stats }: { cycle: Cycle; stats: DashboardStats }) {
+  const nextTodo = stats.orderedTodos[0];
+  const kept = stats.cycleTodos.reduce((sum, todo) => sum + todo.completionLog.length, 0);
+  const possible = Math.max(kept + stats.activeCount + stats.skippedCount, stats.activeCount);
+
   return (
-    <div
-      className="grid aspect-square w-40 place-items-center rounded-full border bg-muted/40 text-center md:w-56"
-      aria-label={`Average adherence score ${score}`}
-    >
-      <div>
-        <span className="block font-heading text-6xl font-semibold tracking-tight md:text-8xl">
-          {score}
-        </span>
-        <small className="text-sm text-muted-foreground">adherence</small>
+    <section className="stage">
+      <div className="dial-wrap" aria-label={`Average adherence score ${stats.score}`}>
+        <DayDial todos={stats.orderedTodos} />
+        <div className="dial-center">
+          <div className="now-tag">it is</div>
+          <div className="now-h">{formatClock(new Date())}</div>
+          <div className="frac">
+            <b>{kept}</b> of {possible} returns kept
+          </div>
+          <div className="next">
+            <i /> next: <b>{nextTodo ? nextTodo.title : "Add a cadence"}</b>
+          </div>
+        </div>
       </div>
+      <SideRail cycle={cycle} stats={stats} />
+    </section>
+  );
+}
+
+function DayDial({ todos }: { todos: Array<Todo> }) {
+  const marks = buildDialMarks(todos);
+  const progress = dayProgress(new Date());
+  const progressPath = arcPath(285, 0, progress);
+  const futurePath = arcPath(285, progress, 1);
+  const nowPoint = polar(progress);
+
+  return (
+    <svg viewBox="0 0 720 720" aria-hidden="true">
+      <defs>
+        <linearGradient id="seaArc" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#b8d8d3" stopOpacity="0.65" />
+          <stop offset="55%" stopColor="#ecdcc1" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="#e87b5a" stopOpacity="0.85" />
+        </linearGradient>
+        <radialGradient id="sun" cx="35%" cy="30%">
+          <stop offset="0%" stopColor="#fff8e8" />
+          <stop offset="55%" stopColor="#f0a890" />
+          <stop offset="100%" stopColor="#c8723a" />
+        </radialGradient>
+        <radialGradient id="halo" cx="50%" cy="50%">
+          <stop offset="0%" stopColor="#f0a890" stopOpacity="0.45" />
+          <stop offset="50%" stopColor="#e87b5a" stopOpacity="0.16" />
+          <stop offset="100%" stopColor="#e87b5a" stopOpacity="0" />
+        </radialGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <circle cx="360" cy="360" r="200" fill="url(#halo)" opacity="0.55" />
+      <circle cx="360" cy="360" r="320" fill="none" stroke="rgba(184,216,211,0.18)" />
+      <circle
+        cx="360"
+        cy="360"
+        r="250"
+        fill="none"
+        stroke="rgba(184,216,211,0.12)"
+        strokeDasharray="2 6"
+      />
+      <path
+        d={arcPath(285, 0.3, 0.67)}
+        fill="none"
+        stroke="rgba(232,123,90,0.14)"
+        strokeWidth="70"
+      />
+      <path
+        d={arcPath(285, 0.79, 0.97)}
+        fill="none"
+        stroke="rgba(184,216,211,0.1)"
+        strokeWidth="70"
+      />
+      <HourTicks />
+      <path d={progressPath} fill="none" stroke="url(#seaArc)" strokeWidth="70" opacity="0.32" />
+      <path
+        d={progressPath}
+        fill="none"
+        stroke="url(#seaArc)"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <path
+        d={futurePath}
+        fill="none"
+        stroke="rgba(184,216,211,0.35)"
+        strokeWidth="1.5"
+        strokeDasharray="2 7"
+        strokeLinecap="round"
+      />
+      {marks.map((mark) => (
+        <DialMark key={mark.key} mark={mark} />
+      ))}
+      <g transform={`translate(${nowPoint.x} ${nowPoint.y})`} filter="url(#glow)">
+        <circle r="36" fill="rgba(240,168,144,0.18)" />
+        <circle r="24" fill="rgba(240,168,144,0.30)" />
+        <circle r="14" fill="url(#sun)" />
+      </g>
+      <line
+        x1="360"
+        y1="360"
+        x2={nowPoint.x}
+        y2={nowPoint.y}
+        stroke="rgba(232,123,90,0.32)"
+        strokeDasharray="2 5"
+      />
+    </svg>
+  );
+}
+
+function HourTicks() {
+  const ticks = Array.from({ length: 9 }, (_, index) => 6 + index * 2);
+
+  return (
+    <>
+      {ticks.map((hour) => {
+        const progress = (hour - 6) / 16.5;
+        const inner = polar(progress, 324);
+        const outer = polar(progress, 338);
+        const labelPoint = polar(progress, 356);
+
+        return (
+          <g key={hour}>
+            <line
+              x1={inner.x}
+              y1={inner.y}
+              x2={outer.x}
+              y2={outer.y}
+              stroke="rgba(184,216,211,0.55)"
+              strokeWidth="1.2"
+            />
+            <text
+              x={labelPoint.x}
+              y={labelPoint.y}
+              fill="rgba(244,237,224,0.78)"
+              fontSize="13"
+              fontFamily="DM Mono, monospace"
+              textAnchor="middle"
+              dominantBaseline="middle"
+            >
+              {String(hour).padStart(2, "0")}
+            </text>
+          </g>
+        );
+      })}
+    </>
+  );
+}
+
+function DialMark({ mark }: { mark: ReturnType<typeof buildDialMarks>[number] }) {
+  const point = polar(mark.progress);
+
+  if (mark.state === "done") {
+    return (
+      <g>
+        <circle cx={point.x} cy={point.y} r="9" fill="#f4ede0" stroke="#0a1f27" strokeWidth="2" />
+        <circle cx={point.x} cy={point.y} r="4" fill="#0a1f27" />
+      </g>
+    );
+  }
+
+  if (mark.state === "due") {
+    return (
+      <g filter="url(#glow)">
+        <circle cx={point.x} cy={point.y} r="16" fill="#e87b5a" />
+        <circle cx={point.x} cy={point.y} r="8" fill="#ffffff" />
+      </g>
+    );
+  }
+
+  return <circle cx={point.x} cy={point.y} r="7" fill="#b8d8d3" opacity="0.42" />;
+}
+
+function SideRail({ cycle, stats }: { cycle: Cycle; stats: DashboardStats }) {
+  const nextDue = stats.orderedTodos[0] ? getDueState(stats.orderedTodos[0]).dueAt : undefined;
+  const missed = stats.skippedCount;
+
+  return (
+    <aside className="side">
+      <SideBlock
+        label="tonight closes at"
+        value="22:30"
+        detail={`${stats.activeCount} cadences in motion.`}
+      />
+      <SideBlock
+        label="steady streak"
+        value={
+          <>
+            <em>{stats.streakDays}</em> days
+          </>
+        }
+        detail={`${cycle.title} keeps its tide.`}
+      />
+      <SideBlock
+        label="next return"
+        value={nextDue ? formatClock(nextDue) : "--:--"}
+        detail={
+          missed
+            ? `${missed} skipped this cycle. Forgive it; carry on.`
+            : "No misses logged this cycle."
+        }
+      />
+    </aside>
+  );
+}
+
+function SideBlock(props: { label: string; value: React.ReactNode; detail: string }) {
+  return (
+    <div className="blok">
+      <div className="l">{props.label}</div>
+      <div className="v">{props.value}</div>
+      <div className="h">{props.detail}</div>
     </div>
   );
 }
 
-function CycleMetrics({ stats }: { stats: DashboardStats }) {
+function CurrentCycleWorkspace({ cycle, stats }: { cycle: Cycle; stats: DashboardStats }) {
   return (
-    <section className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Cycle summary">
-      <Metric label="Active" value={stats.activeCount.toString()} detail="cadences in motion" />
-      <Metric
-        label="Completed"
-        value={stats.completedCount.toString()}
-        detail="with logged effort"
-      />
-      <Metric label="Skipped" value={stats.skippedCount.toString()} detail="explicit misses" />
-      <Metric label="Streak" value={`${stats.streakDays}d`} detail="70+ score days" />
-    </section>
-  );
-}
-
-function CurrentCycleWorkspace({ cycle, todos }: { cycle: Cycle; todos: Array<Todo> }) {
-  return (
-    <section className="mt-4 grid gap-4 lg:grid-cols-[minmax(280px,0.85fr)_minmax(0,1.6fr)] lg:items-start">
+    <section className="tide-workspace">
+      <CurrentTodosList todos={stats.orderedTodos} />
       <AddTodoForm cycle={cycle} />
-      <CurrentTodosList todos={todos} />
     </section>
   );
 }
 
 function CurrentTodosList({ todos }: { todos: Array<Todo> }) {
   return (
-    <div className="grid gap-4">
-      <div>
-        <p className={eyebrow}>Current cadences</p>
-        <h2 className="mt-2 font-heading text-3xl font-semibold tracking-tight md:text-5xl">
-          What needs attention next
+    <div>
+      <div className="section-h">
+        <h2>
+          The <em>currents</em>.
         </h2>
+        <div className="filters" aria-hidden="true">
+          <button className="on">All</button>
+          <button>Due</button>
+          <button>Open windows</button>
+          <button>Logged</button>
+        </div>
       </div>
-      {todos.length === 0 ? (
-        <EmptyState />
-      ) : (
-        todos.map((todo) => <TodoCard key={todo.id} todo={todo} />)
-      )}
+      <div className="currents">
+        {todos.length === 0 ? (
+          <EmptyState />
+        ) : (
+          todos.map((todo) => <TodoCard key={todo.id} todo={todo} />)
+        )}
+      </div>
     </div>
   );
 }
@@ -259,7 +448,7 @@ function AddTodoForm({ cycle }: { cycle: Cycle }) {
 
   return (
     <form
-      className={cn(panel, "grid gap-4 rounded-2xl p-4")}
+      className="tide-form"
       onSubmit={(event) => {
         event.preventDefault();
         if (
@@ -298,7 +487,9 @@ function AddTodoForm({ cycle }: { cycle: Cycle }) {
         setWindowEnd={setWindowEnd}
         setGraceMinutes={setGraceMinutes}
       />
-      <Button type="submit">Add cadence</Button>
+      <Button type="submit" className="swim w-fit">
+        Add cadence
+      </Button>
     </form>
   );
 }
@@ -306,8 +497,10 @@ function AddTodoForm({ cycle }: { cycle: Cycle }) {
 function TodoFormHeader() {
   return (
     <div>
-      <p className={eyebrow}>New cyclic todo</p>
-      <h2 className="mt-2 font-heading text-3xl font-semibold tracking-tight">Design a cadence</h2>
+      <p className={statText}>new cyclic todo</p>
+      <h2 className="form-title">
+        Design a <em>cadence</em>.
+      </h2>
     </div>
   );
 }
@@ -344,7 +537,7 @@ function TodoTextFields(props: {
 
 function TodoRuleFields(props: TodoRuleFieldsProps) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
       <NumberField
         labelText="Per day"
         min="1"
@@ -413,100 +606,97 @@ function TimeField(props: { labelText: string; value: string; onChange: (value: 
 
 function TodoCard({ todo }: { todo: Todo }) {
   const due = getDueState(todo);
-  const { impact, statusTone } = getTodoPresentation(due);
+  const presentation = getTodoPresentation(due, todo);
 
   return (
-    <article
-      aria-label={`Todo: ${todo.title}`}
-      className={cn(panel, statusTone, "grid gap-4 rounded-2xl p-4")}
-    >
-      <TodoCardHeader todo={todo} due={due} impact={impact} />
-      <CadenceProgress score={due.adherenceScore} />
-      <TodoFacts due={due} />
-      <TodoActions todo={todo} />
+    <article aria-label={`Todo: ${todo.title}`} className={cn("current", presentation.rowTone)}>
+      <div className="ic" aria-hidden="true">
+        {presentation.icon}
+      </div>
+      <div>
+        <div className="nm">
+          {renderTideName(todo.title)}
+          {todo.notes ? <span className="nt">{todo.notes}</span> : null}
+        </div>
+      </div>
+      <div className="pulse-col">
+        <span>{todo.frequencyPerDay}x/day cadence</span>
+        <span className="when">{formatWhen(due.dueAt)}</span>
+        <span className={due.isLate ? "miss" : undefined}>{presentation.impact}</span>
+        <span>{due.adherenceScore}% if done now</span>
+        <span>Next after complete {formatWhen(due.nextDueAt)}</span>
+      </div>
+      <WaveBars todo={todo} due={due} />
+      <button
+        className={cn("swim", presentation.buttonTone)}
+        type="button"
+        aria-label="Mark complete"
+        onClick={() => markTodoComplete(todo)}
+      >
+        {presentation.action}
+      </button>
     </article>
   );
 }
 
-function getTodoPresentation(due: ReturnType<typeof getDueState>) {
-  if (due.isLate)
+function getTodoPresentation(due: DueState, todo: Todo) {
+  if (due.isLate) {
     return {
+      action: "Log now",
+      icon: "↻",
       impact: formatImpact(due.minutesLate),
-      statusTone: "border-destructive/50 bg-destructive/5",
+      rowTone: "due",
+      buttonTone: "",
     };
-  if (due.isDue) return { impact: "due now", statusTone: "border-chart-2/40 bg-muted/50" };
+  }
+  if (due.isDue)
+    return { action: "Log now", icon: "↻", impact: "due now", rowTone: "due", buttonTone: "" };
+  if (todo.completionLog.length > 0) {
+    return {
+      action: "Log",
+      icon: "✓",
+      impact: `in ${formatUpcoming(due.minutesUntilDue)}`,
+      rowTone: "done",
+      buttonTone: "ghost",
+    };
+  }
 
   return {
-    impact: `in ${formatImpact(Math.abs(due.minutesUntilDue)).replace(" late", "")}`,
-    statusTone: "border-border bg-card",
+    action: "Log",
+    icon: "∽",
+    impact: `in ${formatUpcoming(due.minutesUntilDue)}`,
+    rowTone: "",
+    buttonTone: "",
   };
 }
 
-function TodoCardHeader(props: {
-  todo: Todo;
-  due: ReturnType<typeof getDueState>;
-  impact: string;
-}) {
+function renderTideName(title: string) {
+  const words = title.trim().split(/\s+/);
+  const last = words.at(-1);
+  if (!last || words.length === 1) return title;
+
   return (
-    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-      <div>
-        <p className={eyebrow}>{props.todo.frequencyPerDay}x/day cadence</p>
-        <h3 className="mt-2 font-heading text-2xl font-semibold tracking-tight">
-          {props.todo.title}
-        </h3>
-        {props.todo.notes ? (
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            {props.todo.notes}
-          </p>
-        ) : null}
-      </div>
-      <ImpactBadge impact={props.impact} score={props.due.adherenceScore} />
-    </div>
+    <>
+      {words.slice(0, -1).join(" ")} <em>{last}</em>
+    </>
   );
 }
 
-function ImpactBadge({ impact, score }: { impact: string; score: number }) {
-  return (
-    <div className="rounded-xl border bg-background px-4 py-3 text-right shadow-xs">
-      <strong className="block text-sm font-semibold">{impact}</strong>
-      <small className="text-xs text-muted-foreground">{score}% if done now</small>
-    </div>
-  );
-}
+function WaveBars({ todo, due }: { todo: Todo; due: DueState }) {
+  const total = Math.max(1, Math.min(8, todo.frequencyPerDay));
+  const completed = Math.min(todo.completionLog.length, total);
+  const currentClass = due.isLate ? "miss" : "now";
+  const bars = Array.from({ length: total }, (_, index) => ({
+    key: `${todo.id}-${index}`,
+    className: index < completed ? "done" : currentClass,
+    height: 12 + ((index * 5) % 6) * 2,
+  }));
 
-function CadenceProgress({ score }: { score: number }) {
   return (
-    <div className="h-2 overflow-hidden rounded-full bg-muted" aria-hidden="true">
-      <span
-        className="block h-full rounded-full bg-primary"
-        style={{ width: `${Math.max(8, score)}%` }}
-      />
-    </div>
-  );
-}
-
-function TodoFacts({ due }: { due: ReturnType<typeof getDueState> }) {
-  return (
-    <dl className="grid gap-3 text-sm sm:grid-cols-3">
-      <Fact label="Due" value={formatWhen(due.dueAt)} />
-      <Fact label="Window closes" value={formatWhen(due.windowClosesAt)} />
-      <Fact label="Next after complete" value={formatWhen(due.nextDueAt)} />
-    </dl>
-  );
-}
-
-function TodoActions({ todo }: { todo: Todo }) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      <Button type="button" onClick={() => markTodoComplete(todo)}>
-        Mark complete
-      </Button>
-      <Button type="button" variant="outline" onClick={() => skipTodo(todo.id)}>
-        Skip
-      </Button>
-      <Button type="button" variant="ghost" onClick={() => todosCollection.delete(todo.id)}>
-        Delete
-      </Button>
+    <div className="wave" aria-hidden="true">
+      {bars.map((bar) => (
+        <i key={bar.key} className={bar.className} style={{ height: bar.height }} />
+      ))}
     </div>
   );
 }
@@ -517,32 +707,23 @@ export function History() {
   const cycleHistory = [...cycles].sort((a, b) => b.startsAt.localeCompare(a.startsAt));
 
   return (
-    <section className={cn(panel, "rounded-3xl p-6 lg:p-10")}>
-      <div>
-        <p className={eyebrow}>Cycle history</p>
-        <h1 className="mt-2 font-heading text-5xl font-semibold tracking-tight md:text-7xl">
-          Consistency ledger
-        </h1>
-      </div>
+    <section className="tide-panel">
+      <p className={statText}>cycle history</p>
+      <h1 className="form-title">
+        Consistency <em>ledger</em>.
+      </h1>
       <div className="mt-8 grid gap-3">
         {cycleHistory.map((cycle) => {
           const cycleTodos = todos.filter((todo) => todo.cycleId === cycle.id);
           return (
-            <article
-              key={cycle.id}
-              className="flex items-center justify-between gap-4 rounded-2xl border bg-background p-4"
-            >
+            <article key={cycle.id} className="ledger-row">
               <div>
-                <h3 className="font-heading text-2xl font-semibold tracking-tight">
-                  {cycle.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">
+                <h3>{cycle.title}</h3>
+                <p>
                   {new Date(cycle.startsAt).toLocaleDateString()} · {cycle.status}
                 </p>
               </div>
-              <strong className="font-heading text-3xl font-semibold tracking-tight">
-                {averageScore(cycleTodos)}%
-              </strong>
+              <strong>{averageScore(cycleTodos)}%</strong>
             </article>
           );
         })}
@@ -559,67 +740,45 @@ export function SettingsPage() {
   };
 
   return (
-    <section className={cn(panel, "grid max-w-2xl gap-5 rounded-3xl p-6 lg:p-10")}>
-      <div>
-        <p className={eyebrow}>Settings collection</p>
-        <h1 className="mt-2 font-heading text-5xl font-semibold tracking-tight">
-          Local preferences
-        </h1>
-      </div>
-      <label className={label}>
+    <section className="tide-panel max-w-2xl">
+      <p className={statText}>settings collection</p>
+      <h1 className="form-title">
+        Local <em>preferences</em>.
+      </h1>
+      <label className={cn(label, "mt-8")}>
         Theme
         <select
           className={field}
           value={current.theme}
-          onChange={(event) => {
-            const theme = event.target.value as Settings["theme"];
-            if (settings.some((entry) => entry.id === "settings")) {
-              settingsCollection.update("settings", (draft) => {
-                draft.theme = theme;
-              });
-            } else {
-              settingsCollection.insert({ id: "settings", theme });
-            }
-          }}
+          onChange={(event) => updateTheme(settings, event.target.value as Settings["theme"])}
         >
           <option value="system">System</option>
           <option value="light">Light</option>
           <option value="dark">Dark</option>
         </select>
       </label>
-      <p className="text-sm leading-6 text-muted-foreground">
+      <p className="mt-5 text-sm leading-6 text-[color:var(--foam)]/75">
         All app data is stored in localStorage under the `cadence.*` keys.
       </p>
     </section>
   );
 }
 
-function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
-  return (
-    <article className={cn(panel, "grid gap-1 rounded-2xl p-4")}>
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <strong className="font-heading text-4xl font-semibold tracking-tight">{value}</strong>
-      <small className="text-xs text-muted-foreground">{detail}</small>
-    </article>
-  );
-}
-
-function Fact({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border bg-background p-3">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="mt-1 font-medium">{value}</dd>
-    </div>
-  );
+function updateTheme(settings: Array<Settings>, theme: Settings["theme"]) {
+  if (settings.some((entry) => entry.id === "settings")) {
+    settingsCollection.update("settings", (draft) => {
+      draft.theme = theme;
+    });
+  } else {
+    settingsCollection.insert({ id: "settings", theme });
+  }
 }
 
 function EmptyState() {
   return (
-    <article className={cn(panel, "rounded-2xl p-8")}>
-      <h3 className="font-heading text-2xl font-semibold tracking-tight">No active cadences yet</h3>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">
-        Add a task with a daily frequency, allowed time bounds, and a minimum spacing rule.
-      </p>
+    <article className="empty-current">
+      <h3>No active cadences yet</h3>
+      <p>Add a task with a daily frequency, allowed time bounds, and a minimum spacing rule.</p>
     </article>
   );
 }
@@ -635,6 +794,173 @@ function ensureActiveCycle(activeCycle: Cycle | undefined) {
   cyclesCollection.insert(createDefaultCycle());
 }
 
+function seedDevCadences(activeCycle: Cycle | undefined, hasCycleTodos: boolean) {
+  const cycleId = getDevSeedCycleId(activeCycle, hasCycleTodos);
+  if (!cycleId) return;
+
+  isSeedingDevCadences = true;
+  for (const todo of createTideSeedTodos(cycleId)) todosCollection.insert(todo);
+}
+
+function getDevSeedCycleId(activeCycle: Cycle | undefined, hasCycleTodos: boolean) {
+  const blockers = [!import.meta.env.DEV, !activeCycle, hasCycleTodos, isSeedingDevCadences];
+
+  return blockers.some(Boolean) ? undefined : activeCycle?.id;
+}
+
+function createTideSeedTodos(cycleId: string) {
+  const now = new Date();
+  const updatedAt = now.toISOString();
+
+  return [
+    tideSeedTodo({
+      cycleId,
+      id: "dev-stretch-break",
+      title: "Stretch break",
+      notes: "Ninety-minute desk reset.",
+      frequencyPerDay: 8,
+      minSpacingHours: 1.5,
+      windowStart: "06:00",
+      windowEnd: "22:30",
+      graceMinutes: 10,
+      createdAt: todayAt(now, "08:00"),
+      updatedAt,
+      completionTimes: ["09:10", "10:40", "11:40"],
+    }),
+    tideSeedTodo({
+      cycleId,
+      id: "dev-hydrate",
+      title: "Hydrate",
+      notes: "A glass between meetings.",
+      frequencyPerDay: 8,
+      minSpacingHours: 1.5,
+      windowStart: "06:00",
+      windowEnd: "22:30",
+      graceMinutes: 30,
+      createdAt: todayAt(now, "07:00"),
+      updatedAt,
+      completionTimes: ["08:18", "10:48", "12:18"],
+    }),
+    tideSeedTodo({
+      cycleId,
+      id: "dev-inbox-triage",
+      title: "Inbox triage",
+      notes: "Sort, don't reply. Defer is allowed.",
+      frequencyPerDay: 2,
+      minSpacingHours: 4,
+      windowStart: "09:00",
+      windowEnd: "17:30",
+      graceMinutes: 30,
+      createdAt: todayAt(now, "09:30"),
+      updatedAt,
+      completionTimes: ["11:30"],
+    }),
+    tideSeedTodo({
+      cycleId,
+      id: "dev-walk-outside",
+      title: "Walk outside",
+      notes: "Twenty minutes, daylight on the face.",
+      frequencyPerDay: 1,
+      minSpacingHours: 0,
+      windowStart: "11:00",
+      windowEnd: "17:00",
+      graceMinutes: 45,
+      createdAt: todayAt(now, "11:00"),
+      updatedAt,
+      completionTimes: [],
+    }),
+    tideSeedTodo({
+      cycleId,
+      id: "dev-read-paper",
+      title: "Read paper only",
+      notes: "Twenty pages, anywhere but a screen.",
+      frequencyPerDay: 1,
+      minSpacingHours: 0,
+      windowStart: "19:00",
+      windowEnd: "22:00",
+      graceMinutes: 30,
+      createdAt: todayAt(now, "19:00"),
+      updatedAt,
+      completionTimes: [],
+    }),
+    tideSeedTodo({
+      cycleId,
+      id: "dev-wind-down",
+      title: "Wind down",
+      notes: "Lights low, screens away.",
+      frequencyPerDay: 1,
+      minSpacingHours: 0,
+      windowStart: "21:30",
+      windowEnd: "23:00",
+      graceMinutes: 20,
+      createdAt: todayAt(now, "21:30"),
+      updatedAt,
+      completionTimes: [],
+    }),
+    tideSeedTodo({
+      cycleId,
+      id: "dev-brush-teeth",
+      title: "Brush teeth",
+      notes: "Morning and evening.",
+      frequencyPerDay: 2,
+      minSpacingHours: 8,
+      windowStart: "06:00",
+      windowEnd: "22:30",
+      graceMinutes: 30,
+      createdAt: todayAt(now, "06:30"),
+      updatedAt,
+      completionTimes: ["13:00"],
+    }),
+  ];
+}
+
+function tideSeedTodo(input: {
+  cycleId: string;
+  id: string;
+  title: string;
+  notes: string;
+  frequencyPerDay: number;
+  minSpacingHours: number;
+  windowStart: string;
+  windowEnd: string;
+  graceMinutes: number;
+  createdAt: string;
+  updatedAt: string;
+  completionTimes: Array<string>;
+}): Todo {
+  const completionLog = input.completionTimes.map((time) => ({
+    completedAt: todayAt(new Date(input.updatedAt), time),
+    dueAt: todayAt(new Date(input.updatedAt), time),
+    latenessMinutes: 0,
+    score: 100,
+  }));
+
+  return {
+    id: input.id,
+    cycleId: input.cycleId,
+    title: input.title,
+    notes: input.notes,
+    status: "active",
+    createdAt: input.createdAt,
+    updatedAt: input.updatedAt,
+    completedAt: completionLog.at(-1)?.completedAt,
+    frequencyPerDay: input.frequencyPerDay,
+    minSpacingHours: input.minSpacingHours,
+    windowStart: input.windowStart,
+    windowEnd: input.windowEnd,
+    graceMinutes: input.graceMinutes,
+    completionLog,
+  };
+}
+
+function todayAt(base: Date, time: string) {
+  const [hoursPart, minutesPart] = time.split(":");
+  const result = new Date(base);
+  result.setHours(Number(hoursPart), Number(minutesPart), 0, 0);
+
+  return result.toISOString();
+}
+
 function getDashboardStats(todos: Array<Todo>, activeCycle: Cycle | undefined): DashboardStats {
   const cycleTodos = activeCycle
     ? todos.filter((todo) => todo.cycleId === activeCycle.id && !todo.deletedAt)
@@ -646,6 +972,7 @@ function getDashboardStats(todos: Array<Todo>, activeCycle: Cycle | undefined): 
 
   return {
     orderedTodos,
+    cycleTodos,
     activeCount: activeTodos.length,
     completedCount: cycleTodos.filter((todo) => todo.completionLog.length > 0).length,
     skippedCount: cycleTodos.filter((todo) => todo.status === "skipped").length,
@@ -664,17 +991,68 @@ function markTodoComplete(todo: Todo) {
   });
 }
 
-function skipTodo(todoId: string) {
-  todosCollection.update(todoId, (draft) => {
-    draft.status = "skipped";
-    draft.updatedAt = nowIso();
-  });
-}
-
 function updateFiniteNumber(value: number, setValue: (value: number) => void) {
   if (Number.isFinite(value)) setValue(value);
 }
 
 function hasValidCadenceNumbers(...values: Array<number>) {
   return values.every(Number.isFinite);
+}
+
+function buildDialMarks(todos: Array<Todo>) {
+  const marks = todos.flatMap((todo) => {
+    const due = getDueState(todo);
+    const completions = todo.completionLog.slice(-3).map((completion, index) => ({
+      key: `${todo.id}-done-${index}`,
+      progress: dayProgress(new Date(completion.completedAt)),
+      state: "done" as const,
+    }));
+
+    return [
+      ...completions,
+      {
+        key: `${todo.id}-due`,
+        progress: dayProgress(due.dueAt),
+        state: due.isDue ? ("due" as const) : ("window" as const),
+      },
+    ];
+  });
+
+  if (marks.length > 0) return marks.slice(0, 18);
+
+  return [0.18, 0.34, 0.52, 0.68, 0.86].map((progress, index) => ({
+    key: `placeholder-${index}`,
+    progress,
+    state: "window" as const,
+  }));
+}
+
+function dayProgress(date: Date) {
+  const minutes = date.getHours() * 60 + date.getMinutes();
+  const start = 6 * 60;
+  const span = 16.5 * 60;
+
+  return Math.min(1, Math.max(0, (minutes - start) / span));
+}
+
+function arcPath(radius: number, start: number, end: number) {
+  const p0 = polar(start, radius);
+  const p1 = polar(end, radius);
+  const large = (end - start) * Math.PI * 2 * 0.92 > Math.PI ? 1 : 0;
+
+  return `M ${p0.x} ${p0.y} A ${radius} ${radius} 0 ${large} 1 ${p1.x} ${p1.y}`;
+}
+
+function polar(progress: number, radius = 285) {
+  const angle = -Math.PI / 2 + Math.PI * 2 * 0.92 * progress;
+
+  return { x: 360 + Math.cos(angle) * radius, y: 360 + Math.sin(angle) * radius };
+}
+
+function formatClock(date: Date) {
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+function formatUpcoming(minutesUntilDue: number) {
+  return formatImpact(Math.abs(minutesUntilDue)).replace(" late", "");
 }
