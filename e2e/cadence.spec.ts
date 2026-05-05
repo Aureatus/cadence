@@ -66,7 +66,8 @@ test("creates a cyclic todo, completes an occurrence, and persists collection da
 
   const createdTodos = await readCollection<TodoRecord>(page, "cadence.todos");
   expect(createdTodos).toHaveLength(1);
-  expect(createdTodos[0]).toMatchObject({
+  const createdTodo = firstItem(createdTodos);
+  expect(createdTodo).toMatchObject({
     title: "Hydration pulse",
     frequencyPerDay: 3,
     minSpacingHours: 4,
@@ -80,10 +81,11 @@ test("creates a cyclic todo, completes an occurrence, and persists collection da
   await expect(page.getByLabel("Average adherence score 100")).toBeVisible();
 
   const completedTodos = await readCollection<TodoRecord>(page, "cadence.todos");
-  expect(completedTodos[0].status).toBe("active");
-  expect(completedTodos[0].completedAt).toBe(baseNow);
-  expect(completedTodos[0].completionLog).toHaveLength(1);
-  expect(completedTodos[0].completionLog[0]).toMatchObject({
+  const completedTodo = firstItem(completedTodos);
+  expect(completedTodo.status).toBe("active");
+  expect(completedTodo.completedAt).toBe(baseNow);
+  expect(completedTodo.completionLog).toHaveLength(1);
+  expect(firstItem(completedTodo.completionLog)).toMatchObject({
     completedAt: baseNow,
     latenessMinutes: 0,
     score: 100,
@@ -128,7 +130,7 @@ test("keeps an uncompleted occurrence overdue and shows lateness impact", async 
 
   await card.getByRole("button", { name: "Mark complete" }).click();
   const todos = await readCollection<TodoRecord>(page, "cadence.todos");
-  expect(todos[0].completionLog[0]).toMatchObject({
+  expect(firstItem(firstItem(todos).completionLog)).toMatchObject({
     completedAt: seedNow,
     latenessMinutes: 75,
     score: 55,
@@ -266,4 +268,11 @@ function collectionStorage<T extends { id: string }>(items: Array<T>) {
   ) as StoredCollection<T>;
 
   return JSON.stringify(collection);
+}
+
+function firstItem<T>(items: Array<T>) {
+  const item = items[0];
+  if (!item) throw new Error("Expected at least one item");
+
+  return item;
 }

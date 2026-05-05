@@ -266,7 +266,13 @@ function minutesFromTime(time: string) {
 }
 
 function parseTime(time: string) {
-  const [hours, minutes] = time.split(":").map(Number);
+  const [hoursPart, minutesPart] = time.split(":");
+  const hours = Number(hoursPart);
+  const minutes = Number(minutesPart);
+
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+    throw new Error(`Invalid time value: ${time}`);
+  }
 
   return { hours, minutes };
 }
