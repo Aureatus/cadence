@@ -1,0 +1,17 @@
+{
+  "threshold": 0,
+  "minLines": 8,
+  "minTokens": 80,
+  "reporters": ["console"],
+  "formats": ["typescript", "javascript", "css"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/dev-dist/**",
+    "**/playwright-report/**",
+    "**/test-results/**",
+    "**/public/**",
+    "**/*.json",
+    "**/*.lock"
+  ]
+}

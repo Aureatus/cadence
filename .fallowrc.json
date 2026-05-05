@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schemas/config.schema.json",
+  "entry": ["src/main.tsx", "src/router.tsx", "vite.config.ts", "playwright.config.ts"],
+  "ignorePatterns": [
+    "node_modules/**",
+    "dist/**",
+    "dev-dist/**",
+    "playwright-report/**",
+    "test-results/**",
+    "public/**"
+  ],
+  "duplicates": {
+    "threshold": 80,
+    "minLines": 8
+  }
+}
