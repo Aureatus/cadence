@@ -58,7 +58,7 @@ test("creates a cyclic todo, completes an occurrence, and persists collection da
   await dialog.getByLabel("Times per day").fill("3");
   await dialog.getByLabel("Window start").fill("00:00");
   await dialog.getByLabel("Window end").fill("23:59");
-  await dialog.getByLabel("Grace window").fill("45");
+  await dialog.getByLabel("Grace minutes").fill("45");
   await dialog.getByRole("button", { name: "Add cadence" }).click();
   await expect(dialog).not.toBeVisible();
 

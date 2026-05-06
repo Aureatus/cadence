@@ -31,7 +31,11 @@ export function Dashboard() {
       <DashboardHero cycle={activeCycle} />
       <div className="2xl:grid 2xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] 2xl:items-start 2xl:gap-12 3xl:gap-16">
         <TideStage cycle={activeCycle} stats={stats} />
-        <CurrentTodosList cycle={activeCycle} todos={stats.orderedTodos} />
+        <CurrentTodosList
+          cycle={activeCycle}
+          todos={stats.orderedTodos}
+          settledTodos={stats.cycleTodos.filter((todo) => todo.status === "skipped")}
+        />
       </div>
     </>
   );

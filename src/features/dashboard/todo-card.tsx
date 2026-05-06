@@ -1,8 +1,10 @@
 import { Fragment, type ReactNode } from "react";
+import { XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Todo } from "@/db";
 import {
+  archiveTodo,
   getTodoPresentation,
   markTodoComplete,
   type DueState,
@@ -20,7 +22,7 @@ export function TodoCard({ todo }: { todo: Todo }) {
     <article
       aria-label={`Todo: ${todo.title}`}
       className={cn(
-        "grid border-b border-rule transition-colors",
+        "group/todo relative grid border-b border-rule transition-colors",
         "grid-cols-[40px_minmax(0,1fr)] grid-rows-[auto_auto_auto] items-start gap-x-3.5 gap-y-1.5 py-4",
         "md:grid-cols-[48px_minmax(0,1fr)_minmax(0,130px)_minmax(0,130px)] md:grid-rows-1 md:items-center md:gap-5 md:py-5",
         "xl:grid-cols-[48px_minmax(180px,1.3fr)_minmax(0,120px)_minmax(0,1fr)_minmax(0,120px)]",
@@ -60,6 +62,14 @@ export function TodoCard({ todo }: { todo: Todo }) {
       >
         {presentation.action}
       </Button>
+      <button
+        type="button"
+        aria-label={`Archive ${todo.title}`}
+        onClick={() => archiveTodo(todo)}
+        className="absolute top-2 right-0 inline-flex size-6 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-foam/50 opacity-0 transition-all hover:bg-rose/15 hover:text-moon-2 focus-visible:opacity-100 group-hover/todo:opacity-100 md:top-1/2 md:-translate-y-1/2"
+      >
+        <XIcon className="size-3.5" />
+      </button>
     </article>
   );
 }

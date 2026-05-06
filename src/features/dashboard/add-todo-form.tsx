@@ -240,6 +240,7 @@ export function AddTodoForm({ cycle, onClose }: { cycle: Cycle; onClose?: () => 
         windowStart={windowStart}
         windowEnd={windowEnd}
         daysOfWeek={sortedDays}
+        graceMinutes={graceMinutes}
         onCountChange={handleCountChange}
         onWindowStartChange={(m) => {
           if (m < windowEnd - 30) setWindowStart(m);
@@ -248,6 +249,7 @@ export function AddTodoForm({ cycle, onClose }: { cycle: Cycle; onClose?: () => 
           if (m > windowStart + 30) setWindowEnd(m);
         }}
         onDaysChange={setDaysOfWeek}
+        onGraceChange={setGraceMinutes}
       />
 
       <DayStripPreview
@@ -256,6 +258,7 @@ export function AddTodoForm({ cycle, onClose }: { cycle: Cycle; onClose?: () => 
         occs={sortedOccs}
         showGapMarks
         occMarkerWidth={28}
+        graceMinutes={graceMinutes}
         summary={summary}
         warning={warning}
         onWindowStartChange={(m) => setWindowStart(Math.min(m, windowEnd - 30))}
@@ -265,8 +268,6 @@ export function AddTodoForm({ cycle, onClose }: { cycle: Cycle; onClose?: () => 
         onRemoveOccurrence={handleRemoveOccurrence}
         canRemove={sortedOccs.length > 1}
       />
-
-      <GraceField graceMinutes={graceMinutes} setGraceMinutes={setGraceMinutes} />
 
       <FormFooter onCancel={onClose} canSubmit={canSubmit} />
     </form>
@@ -332,20 +333,24 @@ function SelectionSummary({
   windowStart,
   windowEnd,
   daysOfWeek,
+  graceMinutes,
   onCountChange,
   onWindowStartChange,
   onWindowEndChange,
   onDaysChange,
+  onGraceChange,
 }: {
   activePreset: Preset | undefined;
   sortedOccs: Array<number>;
   windowStart: number;
   windowEnd: number;
   daysOfWeek: Array<number>;
+  graceMinutes: number;
   onCountChange: (n: number) => void;
   onWindowStartChange: (m: number) => void;
   onWindowEndChange: (m: number) => void;
   onDaysChange: (days: Array<number>) => void;
+  onGraceChange: (n: number) => void;
 }) {
   return (
     <div className="grid gap-3 border-y border-rule py-4">
@@ -379,7 +384,16 @@ function SelectionSummary({
           }}
           ariaLabel="Window end"
         />
-        .
+        , with
+        <NumToken
+          value={graceMinutes}
+          onChange={onGraceChange}
+          min={0}
+          max={240}
+          step={5}
+          ariaLabel="Grace minutes"
+        />
+        min grace.
       </p>
       <DaySelector days={daysOfWeek} onChange={onDaysChange} />
     </div>
@@ -585,41 +599,6 @@ function TaskNoteFields({
           className="min-h-9 w-full resize-y appearance-none border-0 bg-transparent px-0 py-0.5 font-sans text-sm leading-relaxed text-foam-2 outline-none placeholder:italic placeholder:text-moon/30"
         />
       </div>
-    </div>
-  );
-}
-
-function GraceField({
-  graceMinutes,
-  setGraceMinutes,
-}: {
-  graceMinutes: number;
-  setGraceMinutes: (n: number) => void;
-}) {
-  const graceId = useId();
-  return (
-    <div className="grid grid-cols-1 items-baseline gap-1 border-t border-rule py-4 sm:grid-cols-[120px_1fr] sm:gap-6">
-      {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-      <label
-        htmlFor={graceId}
-        className="pt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-foam/70"
-      >
-        Grace window
-      </label>
-      <span className="inline-flex items-baseline gap-2 font-display text-lg text-moon-2">
-        <input
-          id={graceId}
-          type="number"
-          value={graceMinutes}
-          onChange={(event) =>
-            updateFiniteNumber(event.currentTarget.valueAsNumber, setGraceMinutes)
-          }
-          min={0}
-          max={240}
-          className="w-16 appearance-none border-0 border-b border-rule-2 bg-transparent px-0.5 py-1 font-display text-lg tabular-nums text-moon-2 outline-none focus:border-b-coral [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-        />
-        <span className="font-display text-sm italic text-foam/85">minutes after due</span>
-      </span>
     </div>
   );
 }

@@ -1,11 +1,21 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { ChevronRightIcon, RotateCcwIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { Cycle, Todo } from "@/db";
+import { restoreTodo } from "@/lib/cadence";
 import { AddCadenceDialog } from "./add-cadence-dialog";
 import { TodoCard } from "./todo-card";
 
-export function CurrentTodosList({ cycle, todos }: { cycle: Cycle; todos: Array<Todo> }) {
+export function CurrentTodosList({
+  cycle,
+  todos,
+  settledTodos,
+}: {
+  cycle: Cycle;
+  todos: Array<Todo>;
+  settledTodos: Array<Todo>;
+}) {
   return (
     <div>
       <div className="flex flex-col gap-3.5 border-b border-rule pt-10 pb-3.5">
@@ -32,7 +42,53 @@ export function CurrentTodosList({ cycle, todos }: { cycle: Cycle; todos: Array<
           todos.map((todo) => <TodoCard key={todo.id} todo={todo} />)
         )}
       </div>
+      {settledTodos.length > 0 && <SettledSection todos={settledTodos} />}
     </div>
+  );
+}
+
+function SettledSection({ todos }: { todos: Array<Todo> }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-6 border-t border-rule pt-4">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+        className="inline-flex w-fit cursor-pointer items-center gap-2 border-0 bg-transparent py-1 font-mono text-[11px] tracking-[0.22em] text-foam/65 uppercase transition-colors hover:text-moon-2"
+      >
+        <ChevronRightIcon
+          className={cn("size-3 transition-transform", open ? "rotate-90" : "rotate-0")}
+        />
+        Settled · {todos.length}
+      </button>
+      {open && (
+        <ul className="mt-3 grid gap-1.5">
+          {todos.map((todo) => (
+            <SettledRow key={todo.id} todo={todo} />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function SettledRow({ todo }: { todo: Todo }) {
+  return (
+    <li className="flex items-center justify-between gap-3 rounded-md border border-rule/80 bg-[oklch(15%_0.02_220/0.4)] px-3 py-2 transition-colors">
+      <span className="min-w-0 truncate font-display text-base italic text-foam/80">
+        {todo.title}
+      </span>
+      <button
+        type="button"
+        onClick={() => restoreTodo(todo)}
+        aria-label={`Restore ${todo.title}`}
+        className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border-0 bg-transparent px-2 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-foam/65 transition-colors hover:text-coral-2"
+      >
+        <RotateCcwIcon className="size-3" />
+        Restore
+      </button>
+    </li>
   );
 }
 

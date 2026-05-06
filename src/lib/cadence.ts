@@ -74,6 +74,20 @@ export function markTodoComplete(todo: Todo) {
   });
 }
 
+export function archiveTodo(todo: Todo) {
+  todosCollection.update(todo.id, (draft) => {
+    draft.status = "skipped";
+    draft.updatedAt = nowIso();
+  });
+}
+
+export function restoreTodo(todo: Todo) {
+  todosCollection.update(todo.id, (draft) => {
+    draft.status = "active";
+    draft.updatedAt = nowIso();
+  });
+}
+
 export type TodoPresentation = {
   action: string;
   icon: string;

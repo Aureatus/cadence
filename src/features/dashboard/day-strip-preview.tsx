@@ -17,6 +17,7 @@ export function DayStripPreview({
   occs,
   showGapMarks,
   occMarkerWidth,
+  graceMinutes = 0,
   summary,
   warning,
   onWindowStartChange,
@@ -31,6 +32,7 @@ export function DayStripPreview({
   occs: Array<number>;
   showGapMarks: boolean;
   occMarkerWidth: number;
+  graceMinutes?: number;
   summary: React.ReactNode;
   warning: string | null | undefined;
   onWindowStartChange: ((minutes: number) => void) | undefined;
@@ -153,6 +155,11 @@ export function DayStripPreview({
               style={{ left: `${((h * 60) / TOTAL_MINUTES) * 100}%` }}
             />
           ))}
+
+          {graceMinutes > 0 &&
+            occs.map((minutes, index) => (
+              <GraceTail key={`grace-${index}`} minutes={minutes} graceMinutes={graceMinutes} />
+            ))}
 
           {occs.map((minutes, index) => (
             <Occurrence
@@ -340,6 +347,25 @@ function EdgeHandle({
         )}
       />
     </div>
+  );
+}
+
+function GraceTail({ minutes, graceMinutes }: { minutes: number; graceMinutes: number }) {
+  const left = (minutes / TOTAL_MINUTES) * 100;
+  const widthPct = (graceMinutes / TOTAL_MINUTES) * 100;
+  const titleLabel = `${graceMinutes} min grace`;
+
+  return (
+    <div
+      aria-hidden
+      title={titleLabel}
+      className="pointer-events-none absolute top-3 bottom-3 z-[5] rounded-r-sm"
+      style={{
+        left: `${left}%`,
+        width: `${widthPct}%`,
+        background: "linear-gradient(to right, oklch(70% 0.15 40 / 0.42), oklch(70% 0.15 40 / 0))",
+      }}
+    />
   );
 }
 
