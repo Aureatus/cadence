@@ -18,6 +18,11 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline underline-offset-4 hover:underline",
+        tide: "rounded-full bg-moon-2 text-deep tracking-[0.1em] hover:bg-coral hover:text-moon-2",
+        "tide-due":
+          "rounded-full bg-coral text-moon-2 tracking-[0.1em] hover:bg-moon-2 hover:text-deep",
+        "tide-ghost":
+          "rounded-full border-rule-2 bg-transparent text-foam tracking-[0.1em] hover:border-coral hover:text-coral",
       },
       size: {
         default:
@@ -29,6 +34,7 @@ const buttonVariants = cva(
         "icon-xs": "size-7 [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-9",
         "icon-lg": "size-11",
+        pill: "h-auto gap-1 px-3 py-2 text-[10px] md:px-5 md:py-3 md:text-[13px]",
       },
     },
     defaultVariants: {

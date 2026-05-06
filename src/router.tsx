@@ -1,5 +1,8 @@
 import { createRootRoute, createRoute, createRouter } from "@tanstack/react-router";
-import { Dashboard, History, RootLayout, SettingsPage } from "./App";
+import { RootLayout } from "@/components/layout/root-layout";
+import { Dashboard } from "@/features/dashboard/dashboard";
+import { HistoryPage } from "@/features/history/history-page";
+import { SettingsPage } from "@/features/settings/settings-page";
 
 const rootRoute = createRootRoute({ component: RootLayout });
 
@@ -12,7 +15,7 @@ const indexRoute = createRoute({
 const historyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/history",
-  component: History,
+  component: HistoryPage,
 });
 
 const settingsRoute = createRoute({

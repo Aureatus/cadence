@@ -25,6 +25,7 @@ const todoSchema = z.object({
   windowStart: z.string().regex(/^\d{2}:\d{2}$/),
   windowEnd: z.string().regex(/^\d{2}:\d{2}$/),
   graceMinutes: z.number().int().min(0).max(240),
+  daysOfWeek: z.array(z.number().int().min(0).max(6)).optional(),
   completionLog: z.array(completionSchema),
 });
 

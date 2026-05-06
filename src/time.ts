@@ -53,8 +53,13 @@ export function createTodo(input: {
   windowStart: string;
   windowEnd: string;
   graceMinutes: number;
+  daysOfWeek?: Array<number>;
 }) {
   const now = nowIso();
+  const normalizedDays =
+    input.daysOfWeek && input.daysOfWeek.length > 0 && input.daysOfWeek.length < 7
+      ? [...input.daysOfWeek].sort((a, b) => a - b)
+      : undefined;
 
   return {
     id: newId("todo"),
@@ -69,6 +74,7 @@ export function createTodo(input: {
     windowStart: input.windowStart,
     windowEnd: input.windowEnd,
     graceMinutes: input.graceMinutes,
+    daysOfWeek: normalizedDays,
     completionLog: [],
   };
 }
@@ -174,9 +180,13 @@ function getCurrentDueAt(todo: Todo) {
   if (lastCompletedAt) {
     const candidate = new Date(new Date(lastCompletedAt).getTime() + interval);
 
-    return isInsideWindow(candidate, todo.windowStart, todo.windowEnd)
-      ? candidate
-      : nextWindowStart(candidate, todo.windowStart, todo.windowEnd);
+    if (
+      isInsideWindow(candidate, todo.windowStart, todo.windowEnd) &&
+      isDayActive(todo, candidate)
+    ) {
+      return candidate;
+    }
+    return nextActiveWindowStart(candidate, todo);
   }
 
   return getFirstDueAt(todo, interval);
@@ -190,6 +200,10 @@ function getFirstDueAt(todo: Todo, interval: number) {
     candidate.setDate(candidate.getDate() - 1);
   }
 
+  if (!isDayActive(todo, candidate)) {
+    candidate = nextActiveWindowStart(candidate, todo);
+  }
+
   while (candidate.getTime() + todo.graceMinutes * minuteMs < createdAt.getTime()) {
     candidate = getNextDueAfter(todo, candidate, interval);
   }
@@ -200,11 +214,31 @@ function getFirstDueAt(todo: Todo, interval: number) {
 function getNextDueAfter(todo: Todo, date: Date, interval = cadenceInterval(todo)) {
   let candidate = new Date(date.getTime() + interval);
 
-  if (!isInsideWindow(candidate, todo.windowStart, todo.windowEnd)) {
-    candidate = nextWindowStart(candidate, todo.windowStart, todo.windowEnd);
+  if (
+    !isInsideWindow(candidate, todo.windowStart, todo.windowEnd) ||
+    !isDayActive(todo, candidate)
+  ) {
+    candidate = nextActiveWindowStart(candidate, todo);
   }
 
   return candidate;
+}
+
+function isDayActive(todo: Todo, date: Date) {
+  const days = todo.daysOfWeek;
+  if (!days || days.length === 0) return true;
+  return days.includes(date.getDay());
+}
+
+function nextActiveWindowStart(date: Date, todo: Todo) {
+  let cursor = nextWindowStart(date, todo.windowStart, todo.windowEnd);
+  for (let i = 0; i < 8; i++) {
+    if (isDayActive(todo, cursor)) return cursor;
+    const tomorrow = new Date(cursor);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    cursor = dateAtTime(tomorrow, todo.windowStart);
+  }
+  return cursor;
 }
 
 function cadenceInterval(todo: Todo) {

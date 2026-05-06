@@ -50,14 +50,17 @@ test("creates a cyclic todo, completes an occurrence, and persists collection da
   await expect(page.getByRole("heading", { name: "The day is turning." })).toBeVisible();
   await expect(page.getByText("No active cadences yet")).toBeVisible();
 
-  await page.getByLabel("Task").fill("Hydration pulse");
-  await page.getByLabel("Notes").fill("Drink water before the next deep work block.");
-  await page.getByLabel("Per day").fill("3");
-  await page.getByLabel("Min gap").fill("4");
-  await page.getByLabel("Starts").fill("00:00");
-  await page.getByLabel("Ends").fill("23:59");
-  await page.getByLabel("Grace min").fill("45");
   await page.getByRole("button", { name: "Add cadence" }).click();
+  const dialog = page.locator("[data-slot='dialog-content']");
+  await expect(dialog).toBeVisible();
+  await dialog.getByLabel("The task").fill("Hydration pulse");
+  await dialog.getByLabel("A note").fill("Drink water before the next deep work block.");
+  await dialog.getByLabel("Times per day").fill("3");
+  await dialog.getByLabel("Window start").fill("00:00");
+  await dialog.getByLabel("Window end").fill("23:59");
+  await dialog.getByLabel("Grace window").fill("45");
+  await dialog.getByRole("button", { name: "Add cadence" }).click();
+  await expect(dialog).not.toBeVisible();
 
   const card = page.getByRole("article", { name: "Todo: Hydration pulse" });
   await expect(card).toBeVisible();
@@ -70,7 +73,6 @@ test("creates a cyclic todo, completes an occurrence, and persists collection da
   expect(createdTodo).toMatchObject({
     title: "Hydration pulse",
     frequencyPerDay: 3,
-    minSpacingHours: 4,
     windowStart: "00:00",
     windowEnd: "23:59",
     graceMinutes: 45,
@@ -223,14 +225,16 @@ test("uses the active overnight window for first due calculation after midnight"
 test("persists settings through the localStorage settings collection", async ({ page }) => {
   await openApp(page, "/settings", baseNow);
 
-  await page.getByLabel("Theme").selectOption("dark");
+  const themeTrigger = page.getByLabel("Theme");
+  await themeTrigger.click();
+  await page.getByRole("option", { name: "Dark" }).click();
   await expect(page.locator("html")).toHaveClass(/dark/);
 
   const settings = await readCollection<SettingsRecord>(page, "cadence.settings");
   expect(settings).toEqual([{ id: "settings", theme: "dark" }]);
 
   await page.reload();
-  await expect(page.getByLabel("Theme")).toHaveValue("dark");
+  await expect(page.getByLabel("Theme")).toContainText("Dark");
   await expect(page.locator("html")).toHaveClass(/dark/);
 });
 
