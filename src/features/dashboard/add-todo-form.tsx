@@ -228,6 +228,10 @@ export function AddTodoForm({ cycle, onClose }: { cycle: Cycle; onClose?: () => 
         handleSubmit();
       }}
     >
+      <TaskNoteFields title={title} setTitle={setTitle} notes={notes} setNotes={setNotes} />
+
+      <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-foam/55">the rhythm</p>
+
       <PresetGrid activeId={activePresetId} onApply={applyPreset} />
 
       <SelectionSummary
@@ -262,14 +266,7 @@ export function AddTodoForm({ cycle, onClose }: { cycle: Cycle; onClose?: () => 
         canRemove={sortedOccs.length > 1}
       />
 
-      <DetailFields
-        title={title}
-        setTitle={setTitle}
-        notes={notes}
-        setNotes={setNotes}
-        graceMinutes={graceMinutes}
-        setGraceMinutes={setGraceMinutes}
-      />
+      <GraceField graceMinutes={graceMinutes} setGraceMinutes={setGraceMinutes} />
 
       <FormFooter onCancel={onClose} canSubmit={canSubmit} />
     </form>
@@ -534,95 +531,95 @@ function TimeToken({
   );
 }
 
-function DetailFields({
+function TaskNoteFields({
   title,
   setTitle,
   notes,
   setNotes,
-  graceMinutes,
-  setGraceMinutes,
 }: {
   title: string;
   setTitle: (s: string) => void;
   notes: string;
   setNotes: (s: string) => void;
-  graceMinutes: number;
-  setGraceMinutes: (n: number) => void;
 }) {
   const titleId = useId();
   const notesId = useId();
-  const graceId = useId();
 
   return (
-    <div className="grid gap-0">
-      <Field label="The task" htmlFor={titleId}>
+    <div className="grid gap-3 border-y border-rule py-5">
+      <div className="grid gap-1">
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+        <label
+          htmlFor={titleId}
+          className="font-mono text-[10px] uppercase tracking-[0.28em] text-foam/55"
+        >
+          the task
+        </label>
         <input
           id={titleId}
           type="text"
           value={title}
+          // oxlint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus
           onChange={(event) => setTitle(event.target.value)}
           placeholder="What are you returning to?"
-          className="w-full appearance-none border-0 bg-transparent px-0 py-1 font-display text-[22px] font-normal text-moon-2 outline-none placeholder:italic placeholder:text-moon/30"
+          className="w-full appearance-none border-0 bg-transparent px-0 py-0.5 font-display text-[clamp(28px,3.4vw,40px)] font-normal leading-[1.05] tracking-[-0.012em] text-moon-2 outline-none placeholder:italic placeholder:text-moon/30"
         />
-      </Field>
-      <Field
-        label={
-          <>
-            A note{" "}
-            <span className="text-[0.9em] tracking-normal normal-case opacity-60 italic">
-              (optional)
-            </span>
-          </>
-        }
-        htmlFor={notesId}
-      >
+      </div>
+      <div className="grid gap-1">
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+        <label
+          htmlFor={notesId}
+          className="font-mono text-[10px] uppercase tracking-[0.22em] text-foam/55"
+        >
+          a note{" "}
+          <span className="text-[0.9em] tracking-normal normal-case opacity-70 italic">
+            (optional)
+          </span>
+        </label>
         <textarea
           id={notesId}
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
           placeholder="Something to remember about it."
-          className="min-h-9 w-full resize-y appearance-none border-0 bg-transparent px-0 py-1 font-sans text-sm leading-relaxed text-foam-2 outline-none placeholder:italic placeholder:text-moon/30"
+          className="min-h-9 w-full resize-y appearance-none border-0 bg-transparent px-0 py-0.5 font-sans text-sm leading-relaxed text-foam-2 outline-none placeholder:italic placeholder:text-moon/30"
         />
-      </Field>
-      <Field label="Grace window" htmlFor={graceId}>
-        <span className="inline-flex items-baseline gap-2 font-display text-lg text-moon-2">
-          <input
-            id={graceId}
-            type="number"
-            value={graceMinutes}
-            onChange={(event) =>
-              updateFiniteNumber(event.currentTarget.valueAsNumber, setGraceMinutes)
-            }
-            min={0}
-            max={240}
-            className="w-16 appearance-none border-0 border-b border-rule-2 bg-transparent px-0.5 py-1 font-display text-lg tabular-nums text-moon-2 outline-none focus:border-b-coral [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          />
-          <span className="font-display text-sm italic text-foam/85">minutes after due</span>
-        </span>
-      </Field>
+      </div>
     </div>
   );
 }
 
-function Field({
-  label,
-  htmlFor,
-  children,
+function GraceField({
+  graceMinutes,
+  setGraceMinutes,
 }: {
-  label: React.ReactNode;
-  htmlFor: string;
-  children: React.ReactNode;
+  graceMinutes: number;
+  setGraceMinutes: (n: number) => void;
 }) {
+  const graceId = useId();
   return (
-    <div className="grid grid-cols-1 items-baseline gap-1 border-b border-rule py-4 sm:grid-cols-[120px_1fr] sm:gap-6">
+    <div className="grid grid-cols-1 items-baseline gap-1 border-t border-rule py-4 sm:grid-cols-[120px_1fr] sm:gap-6">
       {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
       <label
-        htmlFor={htmlFor}
+        htmlFor={graceId}
         className="pt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-foam/70"
       >
-        {label}
+        Grace window
       </label>
-      <div className="min-w-0">{children}</div>
+      <span className="inline-flex items-baseline gap-2 font-display text-lg text-moon-2">
+        <input
+          id={graceId}
+          type="number"
+          value={graceMinutes}
+          onChange={(event) =>
+            updateFiniteNumber(event.currentTarget.valueAsNumber, setGraceMinutes)
+          }
+          min={0}
+          max={240}
+          className="w-16 appearance-none border-0 border-b border-rule-2 bg-transparent px-0.5 py-1 font-display text-lg tabular-nums text-moon-2 outline-none focus:border-b-coral [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        />
+        <span className="font-display text-sm italic text-foam/85">minutes after due</span>
+      </span>
     </div>
   );
 }
