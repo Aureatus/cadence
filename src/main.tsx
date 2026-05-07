@@ -7,8 +7,23 @@ import { router } from "./router.tsx";
 
 registerSW({ immediate: true });
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>,
-);
+const root = createRoot(document.getElementById("root")!);
+
+function mount() {
+  root.render(
+    <StrictMode>
+      <RouterProvider router={router} />
+    </StrictMode>,
+  );
+}
+
+if ("fonts" in document) {
+  void Promise.race([
+    document.fonts.ready,
+    new Promise<void>((resolve) => {
+      setTimeout(resolve, 1200);
+    }),
+  ]).then(mount);
+} else {
+  mount();
+}
