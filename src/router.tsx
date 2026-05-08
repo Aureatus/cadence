@@ -2,6 +2,7 @@ import { createRootRoute, createRoute, createRouter } from "@tanstack/react-rout
 import { RootLayout } from "@/components/layout/root-layout";
 import { Dashboard } from "@/features/dashboard/dashboard";
 import { HistoryPage } from "@/features/history/history-page";
+import { dashboardSearchSchema } from "@/lib/filter";
 
 const rootRoute = createRootRoute({ component: RootLayout });
 
@@ -9,6 +10,7 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   component: Dashboard,
+  validateSearch: dashboardSearchSchema,
 });
 
 const historyRoute = createRoute({

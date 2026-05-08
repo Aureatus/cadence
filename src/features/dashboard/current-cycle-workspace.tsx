@@ -1,16 +1,16 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { ChevronRightIcon, RotateCcwIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { Cycle, Todo } from "@/db";
 import { archiveTodo, formatClock, isLoggedToday, isWindowOpen, restoreTodo } from "@/lib/cadence";
+import { DEFAULT_FILTER, type FilterKey } from "@/lib/filter";
 import { getDueState } from "@/time";
 import { AddCadenceDialog } from "./add-cadence-dialog";
 import { ArchiveConfirmDialog } from "./archive-confirm-dialog";
 import { EditCadenceDialog } from "./edit-cadence-dialog";
 import { TodoCard } from "./todo-card";
-
-type FilterKey = "due" | "open" | "logged" | "all";
 
 const FILTERS: ReadonlyArray<{ key: FilterKey; label: string }> = [
   { key: "due", label: "Due" },
@@ -37,7 +37,13 @@ export function CurrentTodosList({
 }) {
   const [editing, setEditing] = useState<Todo | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<Todo | null>(null);
-  const [filter, setFilter] = useState<FilterKey>("due");
+  const search = useSearch({ from: "/" });
+  const filter = search.filter ?? DEFAULT_FILTER;
+  const navigate = useNavigate({ from: "/" });
+
+  function setFilter(next: FilterKey) {
+    void navigate({ search: { filter: next === DEFAULT_FILTER ? undefined : next } });
+  }
 
   const counts = useMemo(
     () =>
