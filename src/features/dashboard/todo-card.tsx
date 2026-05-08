@@ -68,13 +68,14 @@ export function TodoCard({
       >
         {presentation.action}
       </Button>
-      <div className="absolute top-1 right-0 flex gap-0.5 md:top-1/2 md:-translate-y-1/2">
+      <div className="absolute top-1.5 right-1 flex gap-1">
         {onEdit && (
           <button
             type="button"
             aria-label={`Edit ${todo.title}`}
+            title="Edit cadence"
             onClick={() => onEdit(todo)}
-            className="inline-flex size-6 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-foam/40 transition-all hover:bg-coral/15 hover:text-moon-2 group-hover/todo:text-foam/80"
+            className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full border border-rule-2 bg-[oklch(15%_0.02_220/0.6)] text-foam/75 transition-colors hover:border-coral/70 hover:bg-coral/15 hover:text-moon-2"
           >
             <PencilIcon className="size-3.5" />
           </button>
@@ -82,8 +83,9 @@ export function TodoCard({
         <button
           type="button"
           aria-label={`Archive ${todo.title}`}
+          title="Archive cadence"
           onClick={() => archiveTodo(todo)}
-          className="inline-flex size-6 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-foam/40 transition-all hover:bg-rose/15 hover:text-moon-2 group-hover/todo:text-foam/80"
+          className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full border border-rule-2 bg-[oklch(15%_0.02_220/0.6)] text-foam/75 transition-colors hover:border-rose/70 hover:bg-rose/15 hover:text-moon-2"
         >
           <XIcon className="size-3.5" />
         </button>
