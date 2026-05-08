@@ -1,0 +1,61 @@
+---
+const path = Astro.url.pathname;
+const isActive = (linkPath: string, exact = false) =>
+  exact ? path === linkPath : path === linkPath || path.startsWith(`${linkPath}/`);
+
+const navLinks = [
+  { to: "/", label: "Today", num: "i", exact: true },
+  { to: "/history", label: "History", num: "ii", exact: false },
+] as const;
+---
+
+<header class="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center md:gap-6">
+  <a
+    href="/"
+    class="flex min-w-0 max-w-full items-center gap-4 text-moon no-underline"
+    aria-label="Cadence home"
+  >
+    <span class="moon-mark size-9 md:size-[46px]" aria-hidden="true"></span>
+    <span class="min-w-0">
+      <span class="block font-display text-[22px] italic leading-[0.85] tracking-[-0.005em] md:text-4xl">
+        Cadence
+      </span>
+      <span class="mt-1 block font-mono text-[9px] uppercase tracking-[0.16em] text-foam opacity-60 md:text-[10px] md:tracking-[0.26em]">
+        small tides, kept
+      </span>
+    </span>
+  </a>
+
+  <nav
+    aria-label="Primary navigation"
+    class="flex w-full min-w-0 items-baseline justify-between gap-6 font-display md:w-auto md:justify-end md:gap-0"
+  >
+    {
+      navLinks.map((item, i) => {
+        const active = isActive(item.to, item.exact);
+        return (
+          <a
+            href={item.to}
+            data-status={active ? "active" : "inactive"}
+            class:list={[
+              "group/tab relative min-w-0 flex-1 truncate text-center font-display italic leading-tight no-underline transition-colors md:flex-initial md:px-4",
+              "text-[clamp(14px,4.4vw,18px)] text-moon/40 hover:text-moon-2 md:text-[22px]",
+              "data-[status=active]:text-moon-2",
+              i > 0 &&
+                "before:pointer-events-none before:absolute before:inset-y-[18%] before:left-0 before:w-px before:bg-foam/20 md:before:hidden",
+            ]}
+          >
+            <span class="relative -top-2.5 block font-mono text-[9px] not-italic tracking-[0.25em] text-moon/30 group-data-[status=active]/tab:text-coral md:top-0 md:mb-1">
+              {item.num}
+            </span>
+            {item.label}
+            <span
+              aria-hidden="true"
+              class="pointer-events-none absolute inset-x-0 -bottom-2.5 h-px bg-gradient-to-r from-transparent via-coral via-50% to-transparent opacity-0 group-data-[status=active]/tab:opacity-100"
+            ></span>
+          </a>
+        );
+      })
+    }
+  </nav>
+</header>
