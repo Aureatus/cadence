@@ -13,7 +13,9 @@ import {
   createDefaultCycle,
   formatImpact,
   getDueState,
+  isInsideWindow,
   nowIso,
+  toDateKey,
 } from "@/time";
 
 export type DashboardStats = {
@@ -86,6 +88,17 @@ export function restoreTodo(todo: Todo) {
     draft.status = "active";
     draft.updatedAt = nowIso();
   });
+}
+
+export function isWindowOpen(todo: Todo, at: Date = new Date()) {
+  return isInsideWindow(at, todo.windowStart, todo.windowEnd);
+}
+
+export function isLoggedToday(todo: Todo, at: Date = new Date()) {
+  const todayKey = toDateKey(at);
+  return todo.completionLog.some(
+    (completion) => toDateKey(new Date(completion.completedAt)) === todayKey,
+  );
 }
 
 export type TodoPresentation = {

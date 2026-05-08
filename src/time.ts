@@ -260,7 +260,7 @@ function startOfDay(date: Date) {
   return result;
 }
 
-function isInsideWindow(date: Date, start: string, end: string) {
+export function isInsideWindow(date: Date, start: string, end: string) {
   const currentMinutes = date.getHours() * 60 + date.getMinutes();
   const startMinutes = minutesFromTime(start);
   const endMinutes = minutesFromTime(end);
@@ -311,7 +311,7 @@ function parseTime(time: string) {
   return { hours, minutes };
 }
 
-function toDateKey(date: Date) {
+export function toDateKey(date: Date) {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
   const day = `${date.getDate()}`.padStart(2, "0");

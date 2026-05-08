@@ -1,13 +1,23 @@
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { ChevronRightIcon, RotateCcwIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { Cycle, Todo } from "@/db";
-import { archiveTodo, restoreTodo } from "@/lib/cadence";
+import { archiveTodo, isLoggedToday, isWindowOpen, restoreTodo } from "@/lib/cadence";
+import { getDueState } from "@/time";
 import { AddCadenceDialog } from "./add-cadence-dialog";
 import { ArchiveConfirmDialog } from "./archive-confirm-dialog";
 import { EditCadenceDialog } from "./edit-cadence-dialog";
 import { TodoCard } from "./todo-card";
+
+type FilterKey = "all" | "due" | "open" | "logged";
+
+const FILTERS: ReadonlyArray<{ key: FilterKey; label: string }> = [
+  { key: "all", label: "All" },
+  { key: "due", label: "Due" },
+  { key: "open", label: "Open windows" },
+  { key: "logged", label: "Logged" },
+];
 
 export function CurrentTodosList({
   cycle,
@@ -20,6 +30,16 @@ export function CurrentTodosList({
 }) {
   const [editing, setEditing] = useState<Todo | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<Todo | null>(null);
+  const [filter, setFilter] = useState<FilterKey>("all");
+
+  const filteredTodos = useMemo(() => {
+    if (filter === "all") return todos;
+    if (filter === "due") return todos.filter((todo) => getDueState(todo).isDue);
+    if (filter === "open") return todos.filter((todo) => isWindowOpen(todo));
+    return todos.filter((todo) => isLoggedToday(todo));
+  }, [todos, filter]);
+
+  const activeLabel = FILTERS.find((entry) => entry.key === filter)?.label ?? "All";
 
   return (
     <div>
@@ -30,21 +50,27 @@ export function CurrentTodosList({
           </h2>
           <AddCadenceDialog cycle={cycle} />
         </div>
-        <div
-          aria-hidden
-          className="-mx-1 flex w-[calc(100%+0.5rem)] gap-3 overflow-x-auto px-1 [scrollbar-width:none] md:justify-between [&::-webkit-scrollbar]:hidden"
-        >
-          <FilterButton active>All</FilterButton>
-          <FilterButton>Due</FilterButton>
-          <FilterButton>Open windows</FilterButton>
-          <FilterButton>Logged</FilterButton>
+        <div className="-mx-1 flex w-[calc(100%+0.5rem)] gap-3 overflow-x-auto px-1 [scrollbar-width:none] md:justify-between [&::-webkit-scrollbar]:hidden">
+          {FILTERS.map((entry) => (
+            <FilterButton
+              key={entry.key}
+              active={filter === entry.key}
+              onClick={() => setFilter(entry.key)}
+            >
+              {entry.label}
+            </FilterButton>
+          ))}
         </div>
       </div>
       <div className="flex flex-col">
         {todos.length === 0 ? (
           <EmptyState />
+        ) : filteredTodos.length === 0 ? (
+          <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.22em] text-foam/65">
+            Nothing matches &lsquo;{activeLabel}&rsquo; right now.
+          </p>
         ) : (
-          todos.map((todo) => (
+          filteredTodos.map((todo) => (
             <TodoCard key={todo.id} todo={todo} onEdit={setEditing} onArchive={setArchiveTarget} />
           ))
         )}
@@ -118,12 +144,22 @@ function SettledRow({ todo }: { todo: Todo }) {
   );
 }
 
-function FilterButton({ children, active = false }: { children: ReactNode; active?: boolean }) {
+function FilterButton({
+  children,
+  active = false,
+  onClick,
+}: {
+  children: ReactNode;
+  active?: boolean;
+  onClick?: () => void;
+}) {
   return (
     <button
       type="button"
+      onClick={onClick}
+      aria-pressed={active}
       className={cn(
-        "shrink-0 border-0 border-b-[1.5px] border-transparent bg-transparent pb-0.5 font-mono text-[11px] uppercase tracking-[0.18em] whitespace-nowrap text-moon/50 transition-colors",
+        "shrink-0 cursor-pointer border-0 border-b-[1.5px] border-transparent bg-transparent pb-0.5 font-mono text-[11px] uppercase tracking-[0.18em] whitespace-nowrap text-moon/50 transition-colors hover:text-moon-2",
         active && "border-coral text-moon-2",
       )}
     >
