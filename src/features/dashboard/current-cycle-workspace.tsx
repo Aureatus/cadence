@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { Cycle, Todo } from "@/db";
 import { restoreTodo } from "@/lib/cadence";
 import { AddCadenceDialog } from "./add-cadence-dialog";
+import { EditCadenceDialog } from "./edit-cadence-dialog";
 import { TodoCard } from "./todo-card";
 
 export function CurrentTodosList({
@@ -16,6 +17,8 @@ export function CurrentTodosList({
   todos: Array<Todo>;
   settledTodos: Array<Todo>;
 }) {
+  const [editing, setEditing] = useState<Todo | null>(null);
+
   return (
     <div>
       <div className="flex flex-col gap-3.5 border-b border-rule pt-10 pb-3.5">
@@ -39,10 +42,18 @@ export function CurrentTodosList({
         {todos.length === 0 ? (
           <EmptyState />
         ) : (
-          todos.map((todo) => <TodoCard key={todo.id} todo={todo} />)
+          todos.map((todo) => <TodoCard key={todo.id} todo={todo} onEdit={setEditing} />)
         )}
       </div>
       {settledTodos.length > 0 && <SettledSection todos={settledTodos} />}
+      <EditCadenceDialog
+        cycle={cycle}
+        todo={editing}
+        open={editing !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditing(null);
+        }}
+      />
     </div>
   );
 }

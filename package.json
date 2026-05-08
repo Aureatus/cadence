@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "portless": "cadence",
   "scripts": {
     "dev": "PORTLESS_HTTPS=0 PORTLESS_PORT=1355 portless run vite",
     "build": "tsc -b && vite build",
@@ -57,5 +56,6 @@
     "vite": "^7.3.2",
     "vite-plugin-pwa": "^1.2.0"
   },
-  "packageManager": "bun@1.3.5"
+  "packageManager": "bun@1.3.5",
+  "portless": "cadence"
 }

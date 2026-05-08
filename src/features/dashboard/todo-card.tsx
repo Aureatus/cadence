@@ -1,5 +1,5 @@
 import { Fragment, type ReactNode } from "react";
-import { XIcon } from "lucide-react";
+import { PencilIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Todo } from "@/db";
@@ -12,7 +12,13 @@ import {
 } from "@/lib/cadence";
 import { formatWhen, getDueState } from "@/time";
 
-export function TodoCard({ todo }: { todo: Todo }) {
+export function TodoCard({
+  todo,
+  onEdit,
+}: {
+  todo: Todo;
+  onEdit: ((todo: Todo) => void) | undefined;
+}) {
   const due = getDueState(todo);
   const presentation = getTodoPresentation(due, todo);
   const isDue = presentation.rowTone === "due";
@@ -62,14 +68,26 @@ export function TodoCard({ todo }: { todo: Todo }) {
       >
         {presentation.action}
       </Button>
-      <button
-        type="button"
-        aria-label={`Archive ${todo.title}`}
-        onClick={() => archiveTodo(todo)}
-        className="absolute top-2 right-0 inline-flex size-6 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-foam/50 opacity-0 transition-all hover:bg-rose/15 hover:text-moon-2 focus-visible:opacity-100 group-hover/todo:opacity-100 md:top-1/2 md:-translate-y-1/2"
-      >
-        <XIcon className="size-3.5" />
-      </button>
+      <div className="absolute top-1 right-0 flex gap-0.5 opacity-0 transition-opacity group-hover/todo:opacity-100 focus-within:opacity-100 md:top-1/2 md:-translate-y-1/2">
+        {onEdit && (
+          <button
+            type="button"
+            aria-label={`Edit ${todo.title}`}
+            onClick={() => onEdit(todo)}
+            className="inline-flex size-6 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-foam/55 transition-colors hover:bg-coral/15 hover:text-moon-2"
+          >
+            <PencilIcon className="size-3.5" />
+          </button>
+        )}
+        <button
+          type="button"
+          aria-label={`Archive ${todo.title}`}
+          onClick={() => archiveTodo(todo)}
+          className="inline-flex size-6 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-foam/55 transition-colors hover:bg-rose/15 hover:text-moon-2"
+        >
+          <XIcon className="size-3.5" />
+        </button>
+      </div>
     </article>
   );
 }

@@ -1,9 +1,9 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { todosCollection, type Cycle } from "@/db";
+import { todosCollection, type Cycle, type Todo } from "@/db";
 import { formatMinutesAsClock, parseTimeToMinutes, updateFiniteNumber } from "@/lib/cadence";
-import { createTodo } from "@/time";
+import { createTodo, nowIso } from "@/time";
 import { DayStripPreview } from "./day-strip-preview";
 import { MiniDayDial } from "./mini-day-dial";
 
@@ -82,15 +82,58 @@ const presets: Array<Preset> = [
 
 const defaultPreset = presets[1]!;
 
-export function AddTodoForm({ cycle, onClose }: { cycle: Cycle; onClose?: () => void }) {
-  const [title, setTitle] = useState("Brush teeth");
-  const [notes, setNotes] = useState("Morning and evening, not back-to-back.");
-  const [graceMinutes, setGraceMinutes] = useState(30);
+function todoToInitialState(todo: Todo) {
+  const wStart = parseTimeToMinutes(todo.windowStart) ?? 6 * 60;
+  const wEnd = parseTimeToMinutes(todo.windowEnd) ?? 22 * 60;
+  const span = Math.max(0, wEnd - wStart);
+  const count = Math.max(1, todo.frequencyPerDay);
+  const occurrences =
+    count <= 1
+      ? [wStart + span / 2]
+      : Array.from(
+          { length: count },
+          (_, i) => Math.round((wStart + (span / (count - 1)) * i) / SNAP_MINUTES) * SNAP_MINUTES,
+        );
+  return {
+    title: todo.title,
+    notes: todo.notes ?? "",
+    graceMinutes: todo.graceMinutes,
+    occurrences,
+    windowStart: wStart,
+    windowEnd: wEnd,
+    daysOfWeek: todo.daysOfWeek ?? ALL_DAYS,
+  };
+}
 
-  const [occurrences, setOccurrences] = useState<Array<number>>(defaultPreset.occurrences);
-  const [windowStart, setWindowStart] = useState(defaultPreset.windowStart);
-  const [windowEnd, setWindowEnd] = useState(defaultPreset.windowEnd);
-  const [daysOfWeek, setDaysOfWeek] = useState<Array<number>>(defaultPreset.daysOfWeek);
+export function AddTodoForm({
+  cycle,
+  editing,
+  onClose,
+}: {
+  cycle: Cycle;
+  editing?: Todo;
+  onClose?: () => void;
+}) {
+  const initial = editing
+    ? todoToInitialState(editing)
+    : {
+        title: "Brush teeth",
+        notes: "Morning and evening, not back-to-back.",
+        graceMinutes: 30,
+        occurrences: defaultPreset.occurrences,
+        windowStart: defaultPreset.windowStart,
+        windowEnd: defaultPreset.windowEnd,
+        daysOfWeek: defaultPreset.daysOfWeek,
+      };
+
+  const [title, setTitle] = useState(initial.title);
+  const [notes, setNotes] = useState(initial.notes);
+  const [graceMinutes, setGraceMinutes] = useState(initial.graceMinutes);
+
+  const [occurrences, setOccurrences] = useState<Array<number>>(initial.occurrences);
+  const [windowStart, setWindowStart] = useState(initial.windowStart);
+  const [windowEnd, setWindowEnd] = useState(initial.windowEnd);
+  const [daysOfWeek, setDaysOfWeek] = useState<Array<number>>(initial.daysOfWeek);
 
   const sortedOccs = useMemo(() => [...occurrences].sort((a, b) => a - b), [occurrences]);
   const sortedDays = useMemo(() => [...daysOfWeek].sort((a, b) => a - b), [daysOfWeek]);
@@ -188,24 +231,40 @@ export function AddTodoForm({ cycle, onClose }: { cycle: Cycle; onClose?: () => 
   function handleSubmit() {
     if (!canSubmit) return;
 
-    const insertFields = buildTodoFields({
+    const fields = buildTodoFields({
       occs: sortedOccs,
       windowStart,
       windowEnd,
     });
+    const trimmedNotes = notes.trim() || undefined;
+    const normalizedDays = sortedDays.length > 0 && sortedDays.length < 7 ? sortedDays : undefined;
 
-    todosCollection.insert(
-      createTodo({
-        cycleId: cycle.id,
-        title,
-        notes,
-        graceMinutes,
-        daysOfWeek: sortedDays,
-        ...insertFields,
-      }),
-    );
-    setTitle("");
-    setNotes("");
+    if (editing) {
+      todosCollection.update(editing.id, (draft) => {
+        draft.title = title.trim();
+        draft.notes = trimmedNotes;
+        draft.frequencyPerDay = fields.frequencyPerDay;
+        draft.minSpacingHours = fields.minSpacingHours;
+        draft.windowStart = fields.windowStart;
+        draft.windowEnd = fields.windowEnd;
+        draft.graceMinutes = graceMinutes;
+        draft.daysOfWeek = normalizedDays;
+        draft.updatedAt = nowIso();
+      });
+    } else {
+      todosCollection.insert(
+        createTodo({
+          cycleId: cycle.id,
+          title,
+          notes,
+          graceMinutes,
+          daysOfWeek: sortedDays,
+          ...fields,
+        }),
+      );
+      setTitle("");
+      setNotes("");
+    }
     onClose?.();
   }
 
