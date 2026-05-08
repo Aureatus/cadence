@@ -3,8 +3,9 @@ import { ChevronRightIcon, RotateCcwIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { Cycle, Todo } from "@/db";
-import { restoreTodo } from "@/lib/cadence";
+import { archiveTodo, restoreTodo } from "@/lib/cadence";
 import { AddCadenceDialog } from "./add-cadence-dialog";
+import { ArchiveConfirmDialog } from "./archive-confirm-dialog";
 import { EditCadenceDialog } from "./edit-cadence-dialog";
 import { TodoCard } from "./todo-card";
 
@@ -18,6 +19,7 @@ export function CurrentTodosList({
   settledTodos: Array<Todo>;
 }) {
   const [editing, setEditing] = useState<Todo | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<Todo | null>(null);
 
   return (
     <div>
@@ -42,7 +44,9 @@ export function CurrentTodosList({
         {todos.length === 0 ? (
           <EmptyState />
         ) : (
-          todos.map((todo) => <TodoCard key={todo.id} todo={todo} onEdit={setEditing} />)
+          todos.map((todo) => (
+            <TodoCard key={todo.id} todo={todo} onEdit={setEditing} onArchive={setArchiveTarget} />
+          ))
         )}
       </div>
       {settledTodos.length > 0 && <SettledSection todos={settledTodos} />}
@@ -52,6 +56,17 @@ export function CurrentTodosList({
         open={editing !== null}
         onOpenChange={(open) => {
           if (!open) setEditing(null);
+        }}
+      />
+      <ArchiveConfirmDialog
+        todo={archiveTarget}
+        open={archiveTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setArchiveTarget(null);
+        }}
+        onConfirm={() => {
+          if (archiveTarget) archiveTodo(archiveTarget);
+          setArchiveTarget(null);
         }}
       />
     </div>

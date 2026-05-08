@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Todo } from "@/db";
 import {
-  archiveTodo,
   getTodoPresentation,
   markTodoComplete,
   type DueState,
@@ -15,9 +14,11 @@ import { formatWhen, getDueState } from "@/time";
 export function TodoCard({
   todo,
   onEdit,
+  onArchive,
 }: {
   todo: Todo;
   onEdit: ((todo: Todo) => void) | undefined;
+  onArchive: ((todo: Todo) => void) | undefined;
 }) {
   const due = getDueState(todo);
   const presentation = getTodoPresentation(due, todo);
@@ -80,15 +81,17 @@ export function TodoCard({
             <PencilIcon className="size-3.5" />
           </button>
         )}
-        <button
-          type="button"
-          aria-label={`Archive ${todo.title}`}
-          title="Archive cadence"
-          onClick={() => archiveTodo(todo)}
-          className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full border border-rule-2 bg-[oklch(15%_0.02_220/0.6)] text-foam/75 transition-colors hover:border-rose/70 hover:bg-rose/15 hover:text-moon-2"
-        >
-          <XIcon className="size-3.5" />
-        </button>
+        {onArchive && (
+          <button
+            type="button"
+            aria-label={`Archive ${todo.title}`}
+            title="Archive cadence"
+            onClick={() => onArchive(todo)}
+            className="inline-flex size-7 cursor-pointer items-center justify-center rounded-full border border-rule-2 bg-[oklch(15%_0.02_220/0.6)] text-foam/75 transition-colors hover:border-rose/70 hover:bg-rose/15 hover:text-moon-2"
+          >
+            <XIcon className="size-3.5" />
+          </button>
+        )}
       </div>
     </article>
   );
