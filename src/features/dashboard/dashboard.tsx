@@ -15,8 +15,8 @@ export function Dashboard() {
 
   useEffect(() => {
     ensureActiveCycle(activeCycle);
-    seedDevCadences(activeCycle, stats.cycleTodos.length > 0);
-  }, [activeCycle, stats.cycleTodos.length]);
+    seedDevCadences(activeCycle, stats.cycleTodos.length > 0, cycles);
+  }, [activeCycle, cycles, stats.cycleTodos.length]);
 
   if (!activeCycle) {
     return (
