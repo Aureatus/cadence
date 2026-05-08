@@ -20,8 +20,6 @@ export function DevSeedButton() {
   );
 
   function enterPreview() {
-    if (!window.confirm("Hide your real data and show seeded preview fixtures?")) return;
-
     const todosRaw = window.localStorage.getItem("cadence.todos");
     const cyclesRaw = window.localStorage.getItem("cadence.cycles");
     if (todosRaw !== null) window.localStorage.setItem(TODOS_BACKUP, todosRaw);
@@ -39,8 +37,6 @@ export function DevSeedButton() {
   }
 
   function exitPreview() {
-    if (!window.confirm("Discard preview and restore your real data?")) return;
-
     for (const todo of todos) todosCollection.delete(todo.id);
     for (const cycle of cycles) cyclesCollection.delete(cycle.id);
 
