@@ -105,7 +105,7 @@ export type TodoPresentation = {
 export function getTodoPresentation(due: DueState, todo: Todo): TodoPresentation {
   if (due.isLate) {
     return {
-      action: "Log now",
+      action: "Log",
       icon: "↻",
       impact: formatImpact(due.minutesLate),
       rowTone: "due",
@@ -113,7 +113,7 @@ export function getTodoPresentation(due: DueState, todo: Todo): TodoPresentation
     };
   }
   if (due.isDue)
-    return { action: "Log now", icon: "↻", impact: "due now", rowTone: "due", buttonTone: "" };
+    return { action: "Log", icon: "↻", impact: "due now", rowTone: "due", buttonTone: "" };
   if (todo.completionLog.length > 0) {
     return {
       action: "Log",
