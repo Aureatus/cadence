@@ -10,14 +10,21 @@ import { ArchiveConfirmDialog } from "./archive-confirm-dialog";
 import { EditCadenceDialog } from "./edit-cadence-dialog";
 import { TodoCard } from "./todo-card";
 
-type FilterKey = "all" | "due" | "open" | "logged";
+type FilterKey = "due" | "open" | "logged" | "all";
 
 const FILTERS: ReadonlyArray<{ key: FilterKey; label: string }> = [
-  { key: "all", label: "All" },
   { key: "due", label: "Due" },
   { key: "open", label: "Open windows" },
   { key: "logged", label: "Logged" },
+  { key: "all", label: "All" },
 ];
+
+function matchesFilter(filter: FilterKey, todo: Todo) {
+  if (filter === "all") return true;
+  if (filter === "due") return getDueState(todo).isDue;
+  if (filter === "open") return isWindowOpen(todo);
+  return isLoggedToday(todo);
+}
 
 export function CurrentTodosList({
   cycle,
@@ -32,12 +39,22 @@ export function CurrentTodosList({
   const [archiveTarget, setArchiveTarget] = useState<Todo | null>(null);
   const [filter, setFilter] = useState<FilterKey>("all");
 
-  const filteredTodos = useMemo(() => {
-    if (filter === "all") return todos;
-    if (filter === "due") return todos.filter((todo) => getDueState(todo).isDue);
-    if (filter === "open") return todos.filter((todo) => isWindowOpen(todo));
-    return todos.filter((todo) => isLoggedToday(todo));
-  }, [todos, filter]);
+  const counts = useMemo(
+    () =>
+      FILTERS.reduce<Record<FilterKey, number>>(
+        (acc, entry) => {
+          acc[entry.key] = todos.filter((todo) => matchesFilter(entry.key, todo)).length;
+          return acc;
+        },
+        { due: 0, open: 0, logged: 0, all: 0 },
+      ),
+    [todos],
+  );
+
+  const filteredTodos = useMemo(
+    () => todos.filter((todo) => matchesFilter(filter, todo)),
+    [todos, filter],
+  );
 
   const activeLabel = FILTERS.find((entry) => entry.key === filter)?.label ?? "All";
 
@@ -55,6 +72,7 @@ export function CurrentTodosList({
             <FilterButton
               key={entry.key}
               active={filter === entry.key}
+              count={counts[entry.key]}
               onClick={() => setFilter(entry.key)}
             >
               {entry.label}
@@ -147,23 +165,36 @@ function SettledRow({ todo }: { todo: Todo }) {
 function FilterButton({
   children,
   active = false,
+  count,
   onClick,
 }: {
   children: ReactNode;
   active?: boolean;
+  count: number;
   onClick?: () => void;
 }) {
+  const empty = count === 0;
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "shrink-0 cursor-pointer border-0 border-b-[1.5px] border-transparent bg-transparent pb-0.5 font-mono text-[11px] uppercase tracking-[0.18em] whitespace-nowrap text-moon/50 transition-colors hover:text-moon-2",
+        "inline-flex shrink-0 cursor-pointer items-baseline gap-1.5 border-0 border-b-[1.5px] border-transparent bg-transparent pb-0.5 font-mono text-[11px] uppercase tracking-[0.18em] whitespace-nowrap transition-colors",
+        empty ? "text-moon/30 hover:text-moon/55" : "text-moon/50 hover:text-moon-2",
         active && "border-coral text-moon-2",
       )}
     >
-      {children}
+      <span>{children}</span>
+      <span
+        aria-hidden
+        className={cn(
+          "tabular-nums normal-case tracking-normal transition-colors",
+          active ? "text-coral" : empty ? "text-moon/25" : "text-foam/55",
+        )}
+      >
+        {count}
+      </span>
     </button>
   );
 }
