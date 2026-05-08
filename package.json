@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "PORTLESS_HTTPS=0 PORTLESS_PORT=1355 portless run astro dev",
+    "dev": "PORTLESS_HTTPS=0 PORTLESS_PORT=1355 portless run --force astro dev",
     "build": "astro check && astro build",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
