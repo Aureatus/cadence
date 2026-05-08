@@ -68,13 +68,13 @@ export function TodoCard({
       >
         {presentation.action}
       </Button>
-      <div className="absolute top-1 right-0 flex gap-0.5 opacity-0 transition-opacity group-hover/todo:opacity-100 focus-within:opacity-100 md:top-1/2 md:-translate-y-1/2">
+      <div className="absolute top-1 right-0 flex gap-0.5 md:top-1/2 md:-translate-y-1/2">
         {onEdit && (
           <button
             type="button"
             aria-label={`Edit ${todo.title}`}
             onClick={() => onEdit(todo)}
-            className="inline-flex size-6 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-foam/55 transition-colors hover:bg-coral/15 hover:text-moon-2"
+            className="inline-flex size-6 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-foam/40 transition-all hover:bg-coral/15 hover:text-moon-2 group-hover/todo:text-foam/80"
           >
             <PencilIcon className="size-3.5" />
           </button>
@@ -83,7 +83,7 @@ export function TodoCard({
           type="button"
           aria-label={`Archive ${todo.title}`}
           onClick={() => archiveTodo(todo)}
-          className="inline-flex size-6 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-foam/55 transition-colors hover:bg-rose/15 hover:text-moon-2"
+          className="inline-flex size-6 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-foam/40 transition-all hover:bg-rose/15 hover:text-moon-2 group-hover/todo:text-foam/80"
         >
           <XIcon className="size-3.5" />
         </button>
