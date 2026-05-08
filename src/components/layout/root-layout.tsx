@@ -1,15 +1,7 @@
 import { Link, Outlet } from "@tanstack/react-router";
-import { useLiveQuery } from "@tanstack/react-db";
 import { cn } from "@/lib/utils";
-import { settingsCollection } from "@/db";
-import { useApplyTheme, useEnsureSettings } from "@/hooks";
 
 export function RootLayout() {
-  const { data: settings } = useLiveQuery(settingsCollection);
-
-  useEnsureSettings(settings);
-  useApplyTheme(settings);
-
   return (
     <main className="relative z-[1] mx-auto min-h-svh w-full max-w-[2200px] overflow-x-clip px-5 pt-4 pb-16 md:px-11 md:pt-7 md:pb-20 xl:px-12 xl:pt-6 2xl:px-20 2xl:pt-10 2xl:pb-28 3xl:px-28 3xl:pt-12">
       <header className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center md:gap-6">
@@ -44,14 +36,13 @@ function BrandLink() {
 const navLinks = [
   { to: "/", label: "Today", num: "i", exact: true },
   { to: "/history", label: "History", num: "ii", exact: false },
-  { to: "/settings", label: "Settings", num: "iii", exact: false },
 ] as const;
 
 function PrimaryNav() {
   return (
     <nav
       aria-label="Primary navigation"
-      className="flex w-full min-w-0 items-baseline justify-between font-display md:w-auto md:justify-end md:gap-0"
+      className="flex w-full min-w-0 items-baseline justify-between gap-6 font-display md:w-auto md:justify-end md:gap-0"
     >
       {navLinks.map((item, index) => (
         <Link

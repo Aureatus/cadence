@@ -39,15 +39,9 @@ const cycleSchema = z.object({
   updatedAt: isoDate,
 });
 
-const settingsSchema = z.object({
-  id: z.literal("settings"),
-  theme: z.enum(["light", "dark", "system"]),
-});
-
 export type Todo = z.infer<typeof todoSchema>;
 export type Completion = z.infer<typeof completionSchema>;
 export type Cycle = z.infer<typeof cycleSchema>;
-export type Settings = z.infer<typeof settingsSchema>;
 
 export const todosCollection = createCollection(
   localStorageCollectionOptions({
@@ -64,14 +58,5 @@ export const cyclesCollection = createCollection(
     storageKey: "cadence.cycles",
     getKey: (cycle) => cycle.id,
     schema: cycleSchema,
-  }),
-);
-
-export const settingsCollection = createCollection(
-  localStorageCollectionOptions({
-    id: "settings",
-    storageKey: "cadence.settings",
-    getKey: (settings) => settings.id,
-    schema: settingsSchema,
   }),
 );
