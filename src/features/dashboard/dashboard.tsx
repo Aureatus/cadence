@@ -3,7 +3,6 @@ import { useLiveQuery } from "@tanstack/react-db";
 import { Card } from "@/components/ui/card";
 import { cyclesCollection, todosCollection, type Cycle } from "@/db";
 import { ensureActiveCycle, getActiveCycle, getDashboardStats } from "@/lib/cadence";
-import { seedDevCadences } from "@/lib/dev-seed";
 import { CurrentTodosList } from "./current-cycle-workspace";
 import { TideStage } from "./tide-stage";
 
@@ -15,8 +14,7 @@ export function Dashboard() {
 
   useEffect(() => {
     ensureActiveCycle(activeCycle);
-    seedDevCadences(activeCycle, stats.cycleTodos.length > 0, cycles);
-  }, [activeCycle, cycles, stats.cycleTodos.length]);
+  }, [activeCycle]);
 
   if (!activeCycle) {
     return (

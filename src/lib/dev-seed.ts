@@ -25,41 +25,26 @@ type SeedTodoInput = {
   completionLog: Array<Completion>;
 };
 
-export function seedDevCadences(
-  activeCycle: Cycle | undefined,
-  hasCycleTodos: boolean,
-  cycles: Array<Cycle> = [],
-) {
-  if (!shouldSeed(activeCycle, hasCycleTodos, cycles)) return;
-  if (!activeCycle) return;
-
+export function runDevSeed(activeCycle: Cycle) {
+  if (!import.meta.env.DEV) return;
+  if (isSeedingDevCadences) return;
   isSeedingDevCadences = true;
 
-  const now = new Date();
-  const pastCycles = createPastCycles(now);
-  for (const { cycle, todos } of pastCycles) {
-    cyclesCollection.insert(cycle);
-    for (const todo of todos) todosCollection.insert(todo);
+  try {
+    const now = new Date();
+    const pastCycles = createPastCycles(now);
+    for (const { cycle, todos } of pastCycles) {
+      cyclesCollection.insert(cycle);
+      for (const todo of todos) todosCollection.insert(todo);
+    }
+
+    const activeWithTitle = renameActiveCycle(activeCycle, now);
+    for (const todo of createCurrentCycleTodos(activeWithTitle.id, now)) {
+      todosCollection.insert(todo);
+    }
+  } finally {
+    isSeedingDevCadences = false;
   }
-
-  const activeWithTitle = renameActiveCycle(activeCycle, now);
-  for (const todo of createCurrentCycleTodos(activeWithTitle.id, now)) {
-    todosCollection.insert(todo);
-  }
-}
-
-function shouldSeed(activeCycle: Cycle | undefined, hasCycleTodos: boolean, cycles: Array<Cycle>) {
-  const blockers = [
-    !import.meta.env.DEV,
-    !activeCycle,
-    hasCycleTodos,
-    isSeedingDevCadences,
-    // Only seed when localStorage is essentially empty: the only cycle is the
-    // freshly auto-created active one. Avoid clobbering real user history.
-    cycles.length > 1,
-  ];
-
-  return !blockers.some(Boolean);
 }
 
 function renameActiveCycle(activeCycle: Cycle, now: Date) {

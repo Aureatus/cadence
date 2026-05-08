@@ -212,6 +212,7 @@ test("uses the active overnight window for first due calculation after midnight"
     ]),
   });
 
+  await page.getByRole("button", { name: "All" }).click();
   const card = page.getByRole("article", { name: "Todo: Night hydration" });
   await expect(card.getByText("in 1h 30m")).toBeVisible();
   await expect(card.getByText("Tue 4:00 AM")).toBeVisible();

@@ -3,7 +3,7 @@ import { ChevronRightIcon, RotateCcwIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { Cycle, Todo } from "@/db";
-import { archiveTodo, isLoggedToday, isWindowOpen, restoreTodo } from "@/lib/cadence";
+import { archiveTodo, formatClock, isLoggedToday, isWindowOpen, restoreTodo } from "@/lib/cadence";
 import { getDueState } from "@/time";
 import { AddCadenceDialog } from "./add-cadence-dialog";
 import { ArchiveConfirmDialog } from "./archive-confirm-dialog";
@@ -37,7 +37,7 @@ export function CurrentTodosList({
 }) {
   const [editing, setEditing] = useState<Todo | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<Todo | null>(null);
-  const [filter, setFilter] = useState<FilterKey>("all");
+  const [filter, setFilter] = useState<FilterKey>("due");
 
   const counts = useMemo(
     () =>
@@ -84,9 +84,7 @@ export function CurrentTodosList({
         {todos.length === 0 ? (
           <EmptyState />
         ) : filteredTodos.length === 0 ? (
-          <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.22em] text-foam/65">
-            Nothing matches &lsquo;{activeLabel}&rsquo; right now.
-          </p>
+          <FilterEmptyState filter={filter} label={activeLabel} todos={todos} />
         ) : (
           filteredTodos.map((todo) => (
             <TodoCard key={todo.id} todo={todo} onEdit={setEditing} onArchive={setArchiveTarget} />
@@ -196,6 +194,48 @@ function FilterButton({
         {count}
       </span>
     </button>
+  );
+}
+
+function FilterEmptyState({
+  filter,
+  label,
+  todos,
+}: {
+  filter: FilterKey;
+  label: string;
+  todos: Array<Todo>;
+}) {
+  if (filter === "due") {
+    const next = todos
+      .map((todo) => ({ todo, due: getDueState(todo) }))
+      .filter(({ due }) => !due.isDue)
+      .sort((a, b) => a.due.dueAt.getTime() - b.due.dueAt.getTime())[0];
+    return (
+      <div className="mt-8 flex flex-col items-start gap-2">
+        <p className="font-display text-[clamp(22px,2.4vw,30px)] italic leading-tight text-moon-2">
+          The tide&rsquo;s at <em className="text-sand-2">rest</em>.
+        </p>
+        {next ? (
+          <p className="font-mono text-[11px] tracking-[0.22em] text-foam/65 uppercase">
+            Next return ·{" "}
+            <span className="text-coral normal-case tracking-normal">{next.todo.title}</span>{" "}
+            <span className="text-foam/55 normal-case tracking-normal">
+              at {formatClock(next.due.dueAt)}
+            </span>
+          </p>
+        ) : (
+          <p className="font-mono text-[11px] tracking-[0.22em] text-foam/65 uppercase">
+            Nothing returning today.
+          </p>
+        )}
+      </div>
+    );
+  }
+  return (
+    <p className="mt-6 font-mono text-[11px] tracking-[0.22em] text-foam/65 uppercase">
+      Nothing matches &lsquo;{label}&rsquo; right now.
+    </p>
   );
 }
 

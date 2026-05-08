@@ -1,5 +1,6 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import { DevSeedButton } from "@/features/dashboard/dev-seed-button";
 
 export function RootLayout() {
   return (
@@ -9,6 +10,7 @@ export function RootLayout() {
         <PrimaryNav />
       </header>
       <Outlet />
+      {import.meta.env.DEV && <DevSeedButton />}
     </main>
   );
 }
