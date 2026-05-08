@@ -1,11 +1,4 @@
-import {
-  cyclesCollection,
-  settingsCollection,
-  todosCollection,
-  type Cycle,
-  type Settings,
-  type Todo,
-} from "@/db";
+import { cyclesCollection, todosCollection, type Cycle, type Todo } from "@/db";
 import {
   averageScore,
   completeTodo,
@@ -218,14 +211,4 @@ export function buildDialMarks(todos: Array<Todo>): Array<DialMark> {
     progress,
     state: "window",
   }));
-}
-
-export function updateTheme(settings: Array<Settings>, theme: Settings["theme"]) {
-  if (settings.some((entry) => entry.id === "settings")) {
-    settingsCollection.update("settings", (draft) => {
-      draft.theme = theme;
-    });
-  } else {
-    settingsCollection.insert({ id: "settings", theme });
-  }
 }

@@ -2,7 +2,6 @@ import { createRootRoute, createRoute, createRouter } from "@tanstack/react-rout
 import { RootLayout } from "@/components/layout/root-layout";
 import { Dashboard } from "@/features/dashboard/dashboard";
 import { HistoryPage } from "@/features/history/history-page";
-import { SettingsPage } from "@/features/settings/settings-page";
 
 const rootRoute = createRootRoute({ component: RootLayout });
 
@@ -18,13 +17,7 @@ const historyRoute = createRoute({
   component: HistoryPage,
 });
 
-const settingsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/settings",
-  component: SettingsPage,
-});
-
-const routeTree = rootRoute.addChildren([indexRoute, historyRoute, settingsRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, historyRoute]);
 
 export const router = createRouter({ routeTree });
 

@@ -35,11 +35,6 @@ type CycleRecord = {
   updatedAt: string;
 };
 
-type SettingsRecord = {
-  id: "settings";
-  theme: "light" | "dark" | "system";
-};
-
 const baseNow = "2026-05-05T09:00:00.000Z";
 
 test("creates a cyclic todo, completes an occurrence, and persists collection data", async ({
@@ -220,22 +215,6 @@ test("uses the active overnight window for first due calculation after midnight"
   const card = page.getByRole("article", { name: "Todo: Night hydration" });
   await expect(card.getByText("in 1h 30m")).toBeVisible();
   await expect(card.getByText("Tue 4:00 AM")).toBeVisible();
-});
-
-test("persists settings through the localStorage settings collection", async ({ page }) => {
-  await openApp(page, "/settings", baseNow);
-
-  const themeTrigger = page.getByLabel("Theme");
-  await themeTrigger.click();
-  await page.getByRole("option", { name: "Dark" }).click();
-  await expect(page.locator("html")).toHaveClass(/dark/);
-
-  const settings = await readCollection<SettingsRecord>(page, "cadence.settings");
-  expect(settings).toEqual([{ id: "settings", theme: "dark" }]);
-
-  await page.reload();
-  await expect(page.getByLabel("Theme")).toContainText("Dark");
-  await expect(page.locator("html")).toHaveClass(/dark/);
 });
 
 async function openApp(
