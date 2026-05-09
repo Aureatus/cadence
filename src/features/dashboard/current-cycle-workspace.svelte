@@ -10,8 +10,11 @@
 </script>
 
 <script lang="ts">
+  import type { Component } from "svelte";
   import ChevronRightIcon from "lucide-svelte/icons/chevron-right";
+  import PlusIcon from "lucide-svelte/icons/plus";
   import RotateCcwIcon from "lucide-svelte/icons/rotate-ccw";
+  import { buttonVariants } from "@/components/ui/button.svelte";
   import Card from "@/components/ui/card.svelte";
   import CardContent from "@/components/ui/card-content.svelte";
   import { cn } from "@/lib/utils";
@@ -19,10 +22,36 @@
   import { archiveTodo, formatClock, isLoggedToday, isWindowOpen, restoreTodo } from "@/lib/cadence";
   import { useFilter } from "@/lib/use-filter.svelte";
   import { getDueState } from "@/time";
-  import AddCadenceDialog from "./add-cadence-dialog.svelte";
-  import ArchiveConfirmDialog from "./archive-confirm-dialog.svelte";
-  import EditCadenceDialog from "./edit-cadence-dialog.svelte";
   import TodoCard from "./todo-card.svelte";
+
+  // Lazy-loaded dialog components — see preloadDialogs() below
+  let AddCadenceDialog = $state<Component<{
+    cycle: Cycle;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+  }> | null>(null);
+  let EditCadenceDialog = $state<Component<{
+    cycle: Cycle;
+    todo: Todo | null;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+  }> | null>(null);
+  let ArchiveConfirmDialog = $state<Component<{
+    todo: Todo | null;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onConfirm: () => void;
+  }> | null>(null);
+
+  async function loadAddDialog() {
+    AddCadenceDialog ??= (await import("./add-cadence-dialog.svelte")).default;
+  }
+  async function loadEditDialog() {
+    EditCadenceDialog ??= (await import("./edit-cadence-dialog.svelte")).default;
+  }
+  async function loadArchiveDialog() {
+    ArchiveConfirmDialog ??= (await import("./archive-confirm-dialog.svelte")).default;
+  }
 
   type Props = {
     cycle: Cycle;
@@ -34,8 +63,37 @@
 
   let editing = $state<Todo | null>(null);
   let archiveTarget = $state<Todo | null>(null);
+  let addOpen = $state(false);
   let settledOpen = $state(false);
   const filterStore = useFilter();
+
+  // Preload all dialog chunks during browser idle time so the first click
+  // doesn't pay download + parse cost.
+  $effect(() => {
+    if (typeof window === "undefined") return;
+    const idle =
+      window.requestIdleCallback ?? ((cb: IdleRequestCallback) => window.setTimeout(cb, 200));
+    const cancel = window.cancelIdleCallback ?? window.clearTimeout;
+    const id = idle(() => {
+      void loadAddDialog();
+      void loadEditDialog();
+      void loadArchiveDialog();
+    });
+    return () => cancel(id as never);
+  });
+
+  async function openAdd() {
+    await loadAddDialog();
+    addOpen = true;
+  }
+  async function startEdit(todo: Todo) {
+    await loadEditDialog();
+    editing = todo;
+  }
+  async function startArchive(todo: Todo) {
+    await loadArchiveDialog();
+    archiveTarget = todo;
+  }
 
   function matchesFilter(filter: FilterKey, todo: Todo) {
     if (filter === "all") return true;
@@ -77,7 +135,15 @@
       >
         The <em class="text-sand-2">currents</em>.
       </h2>
-      <AddCadenceDialog {cycle} />
+      <button
+        type="button"
+        onclick={openAdd}
+        onmouseenter={() => void loadAddDialog()}
+        class={cn(buttonVariants({ variant: "tide-ghost", size: "pill" }))}
+      >
+        <PlusIcon class="size-3.5" />
+        <span>Add cadence</span>
+      </button>
     </div>
     <div
       class="-mx-1 flex w-[calc(100%+0.5rem)] gap-3 overflow-x-auto px-1 [scrollbar-width:none] md:justify-between [&::-webkit-scrollbar]:hidden"
@@ -152,11 +218,7 @@
       {/if}
     {:else}
       {#each filteredTodos as todo (todo.id)}
-        <TodoCard
-          {todo}
-          onEdit={(t) => (editing = t)}
-          onArchive={(t) => (archiveTarget = t)}
-        />
+        <TodoCard {todo} onEdit={startEdit} onArchive={startArchive} />
       {/each}
     {/if}
   </div>
@@ -197,23 +259,37 @@
       {/if}
     </div>
   {/if}
-  <EditCadenceDialog
-    {cycle}
-    todo={editing}
-    open={editing !== null}
-    onOpenChange={(next) => {
-      if (!next) editing = null;
-    }}
-  />
-  <ArchiveConfirmDialog
-    todo={archiveTarget}
-    open={archiveTarget !== null}
-    onOpenChange={(next) => {
-      if (!next) archiveTarget = null;
-    }}
-    onConfirm={() => {
-      if (archiveTarget) archiveTodo(archiveTarget);
-      archiveTarget = null;
-    }}
-  />
+  {#if AddCadenceDialog}
+    {@const Add = AddCadenceDialog}
+    <Add
+      {cycle}
+      open={addOpen}
+      onOpenChange={(next) => (addOpen = next)}
+    />
+  {/if}
+  {#if EditCadenceDialog}
+    {@const Edit = EditCadenceDialog}
+    <Edit
+      {cycle}
+      todo={editing}
+      open={editing !== null}
+      onOpenChange={(next) => {
+        if (!next) editing = null;
+      }}
+    />
+  {/if}
+  {#if ArchiveConfirmDialog}
+    {@const Archive = ArchiveConfirmDialog}
+    <Archive
+      todo={archiveTarget}
+      open={archiveTarget !== null}
+      onOpenChange={(next) => {
+        if (!next) archiveTarget = null;
+      }}
+      onConfirm={() => {
+        if (archiveTarget) archiveTodo(archiveTarget);
+        archiveTarget = null;
+      }}
+    />
+  {/if}
 </div>

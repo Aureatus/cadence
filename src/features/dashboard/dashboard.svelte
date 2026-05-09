@@ -29,13 +29,8 @@
   </Card>
 {:else}
   <section
-    class="mt-7 grid grid-cols-1 items-start gap-4 border-b border-rule pb-5 md:mt-8 md:gap-5 md:pb-6 lg:grid-cols-[1fr_auto] lg:items-end"
+    class="mt-4 flex justify-end border-b border-rule pb-5 md:mt-5 md:pb-6"
   >
-    <h1
-      class="max-w-[1100px] font-display text-[clamp(48px,9vw,144px)] font-normal leading-[0.92] tracking-[-0.012em] text-balance text-moon-2"
-    >
-      The day is <em class="italic text-sand-2">turning</em>.
-    </h1>
     <div
       class="font-mono text-[10px] uppercase leading-[1.7] tracking-[0.16em] text-foam opacity-75 md:text-[11px] md:tracking-[0.22em] lg:text-right"
     >
