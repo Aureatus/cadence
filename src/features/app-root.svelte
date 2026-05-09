@@ -1,6 +1,6 @@
 <script lang="ts">
+  import type { Component } from "svelte";
   import Dashboard from "@/features/dashboard/dashboard.svelte";
-  import HistoryPage from "@/features/history/history-page.svelte";
 
   function readPath(): string {
     if (typeof window === "undefined") return "/";
@@ -8,6 +8,7 @@
   }
 
   let path = $state(readPath());
+  let HistoryPage = $state<Component | null>(null);
 
   $effect(() => {
     function update() {
@@ -16,10 +17,21 @@
     window.addEventListener("popstate", update);
     return () => window.removeEventListener("popstate", update);
   });
+
+  $effect(() => {
+    if (path.startsWith("/history") && !HistoryPage) {
+      void import("@/features/history/history-page.svelte").then((m) => {
+        HistoryPage = m.default;
+      });
+    }
+  });
 </script>
 
 {#if path.startsWith("/history")}
-  <HistoryPage />
+  {#if HistoryPage}
+    {@const View = HistoryPage}
+    <View />
+  {/if}
 {:else}
   <Dashboard />
 {/if}

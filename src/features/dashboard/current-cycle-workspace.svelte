@@ -67,20 +67,8 @@
   let settledOpen = $state(false);
   const filterStore = useFilter();
 
-  // Preload all dialog chunks during browser idle time so the first click
-  // doesn't pay download + parse cost.
-  $effect(() => {
-    if (typeof window === "undefined") return;
-    const idle =
-      window.requestIdleCallback ?? ((cb: IdleRequestCallback) => window.setTimeout(cb, 200));
-    const cancel = window.cancelIdleCallback ?? window.clearTimeout;
-    const id = idle(() => {
-      void loadAddDialog();
-      void loadEditDialog();
-      void loadArchiveDialog();
-    });
-    return () => cancel(id as never);
-  });
+  // Dialog chunks are downloaded on hover/click. No eager preload — that was
+  // competing with critical render-path resources on slow mobile.
 
   async function openAdd() {
     await loadAddDialog();
