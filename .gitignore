@@ -3,6 +3,7 @@ dist
 dev-dist
 .astro
 .analyze
+.alchemy
 playwright-report
 test-results
 report
