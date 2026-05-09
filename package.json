@@ -9,6 +9,7 @@
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "lint": "oxlint --type-aware --react-plugin --jsx-a11y-plugin --deny-warnings --ignore-path .gitignore .",
+    "analyze": "ANALYZE=1 astro build",
     "pwa:assets": "pwa-assets-generator pwa-source.svg --preset minimal --root public --override --manifest false",
     "check:knip": "knip --no-progress",
     "check:jscpd": "jscpd . --config .jscpd.json",
@@ -35,6 +36,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@astrojs/svelte": "^8.1.0",
+    "@kindspells/astro-shield": "^1.7.1",
     "@playwright/test": "^1.59.1",
     "@tailwindcss/vite": "^4.2.4",
     "@types/node": "^24.12.2",
@@ -48,6 +50,7 @@
     "oxlint": "^1.63.0",
     "oxlint-tsgolint": "^0.22.1",
     "portless": "^0.12.0",
+    "rollup-plugin-visualizer": "^7.0.1",
     "svelte": "^5.55.5",
     "tailwindcss": "^4.2.4",
     "typescript": "~5.9.3",

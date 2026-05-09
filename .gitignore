@@ -2,6 +2,7 @@ node_modules
 dist
 dev-dist
 .astro
+.analyze
 playwright-report
 test-results
 report

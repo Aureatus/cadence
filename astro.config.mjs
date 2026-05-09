@@ -2,12 +2,19 @@ import { defineConfig } from "astro/config";
 import svelte from "@astrojs/svelte";
 import tailwindcss from "@tailwindcss/vite";
 import AstroPWA from "@vite-pwa/astro";
+import { shield } from "@kindspells/astro-shield";
+import { visualizer } from "rollup-plugin-visualizer";
 import { fileURLToPath, URL } from "node:url";
+
+const analyze = process.env.ANALYZE === "1";
 
 export default defineConfig({
   output: "static",
   integrations: [
     svelte(),
+    shield({
+      sri: { enableStatic: true },
+    }),
     AstroPWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "pwa-source.svg", "apple-touch-icon-180x180.png"],
@@ -42,7 +49,20 @@ export default defineConfig({
     }),
   ],
   vite: {
-    plugins: [tailwindcss()],
+    build: analyze ? { sourcemap: true } : {},
+    plugins: [
+      tailwindcss(),
+      ...(analyze
+        ? [
+            visualizer({
+              filename: ".analyze/bundle.html",
+              gzipSize: true,
+              brotliSize: true,
+              template: "treemap",
+            }),
+          ]
+        : []),
+    ],
     resolve: {
       alias: {
         "@": fileURLToPath(new URL("./src", import.meta.url)),
