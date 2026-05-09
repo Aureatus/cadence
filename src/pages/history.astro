@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Header from "@/components/layout/Header.astro";
-import { HistoryPage } from "@/features/history/history-page";
+import { AppRoot } from "@/features/app-root";
 import { DevSeedButton } from "@/features/dashboard/dev-seed-button";
 ---
 
@@ -10,7 +10,15 @@ import { DevSeedButton } from "@/features/dashboard/dev-seed-button";
     class="relative z-[1] mx-auto min-h-svh w-full max-w-[2200px] overflow-x-clip px-5 pt-4 pb-16 md:px-11 md:pt-7 md:pb-20 xl:px-12 xl:pt-6 2xl:px-20 2xl:pt-10 2xl:pb-28 3xl:px-28 3xl:pt-12"
   >
     <Header />
-    <HistoryPage client:only="react" />
-    {import.meta.env.DEV && <DevSeedButton client:only="react" />}
+    <div transition:persist="cadence-app">
+      <AppRoot client:only="react" />
+    </div>
+    {
+      import.meta.env.DEV && (
+        <div transition:persist="cadence-dev-seed">
+          <DevSeedButton client:only="react" />
+        </div>
+      )
+    }
   </main>
 </BaseLayout>
