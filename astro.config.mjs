@@ -6,6 +6,10 @@ import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
   output: "static",
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: "viewport",
+  },
   integrations: [
     react(),
     AstroPWA({

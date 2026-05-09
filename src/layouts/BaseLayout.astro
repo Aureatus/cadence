@@ -25,6 +25,13 @@ const {
     <meta name="description" content={description} />
     <title>{title}</title>
     <ClientRouter />
+    <style is:global>
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+    </style>
   </head>
   <body>
     <slot />
