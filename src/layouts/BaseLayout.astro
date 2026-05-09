@@ -1,6 +1,5 @@
 ---
 import "@/index.css";
-import { ClientRouter } from "astro:transitions";
 
 interface Props {
   title?: string;
@@ -24,16 +23,52 @@ const {
     <meta name="theme-color" content="#ef6f35" />
     <meta name="description" content={description} />
     <title>{title}</title>
-    <ClientRouter />
-    <style is:global>
-      ::view-transition-old(root),
-      ::view-transition-new(root) {
-        animation: none;
-        mix-blend-mode: normal;
-      }
-    </style>
   </head>
   <body>
     <slot />
+    <script>
+      function isInternalLeftClick(event: MouseEvent): HTMLAnchorElement | null {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+          return null;
+        const target = event.target;
+        const link = target instanceof Element ? target.closest("a") : null;
+        if (!link) return null;
+        if (link.target && link.target !== "_self") return null;
+        if (link.hasAttribute("download") || link.hasAttribute("data-full-reload")) return null;
+        const href = link.getAttribute("href");
+        if (!href || href.startsWith("#") || href.startsWith("//")) return null;
+        const url = new URL(link.href);
+        if (url.origin !== location.origin) return null;
+        return link;
+      }
+
+      function syncNavStatus() {
+        const path = location.pathname;
+        for (const a of document.querySelectorAll<HTMLAnchorElement>("header nav a[href]")) {
+          const href = a.getAttribute("href");
+          if (!href) continue;
+          const exact = href === "/";
+          const active = exact
+            ? path === href
+            : path === href || path.startsWith(href + "/");
+          a.dataset.status = active ? "active" : "inactive";
+        }
+      }
+
+      document.addEventListener("click", (event) => {
+        const link = isInternalLeftClick(event);
+        if (!link) return;
+        const url = new URL(link.href);
+        const samePath = url.pathname === location.pathname;
+        const sameSearch = url.search === location.search;
+        if (samePath && sameSearch && !url.hash) return;
+        event.preventDefault();
+        history.pushState({}, "", url);
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      });
+
+      window.addEventListener("popstate", syncNavStatus);
+      syncNavStatus();
+    </script>
   </body>
 </html>
