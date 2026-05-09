@@ -1,4 +1,4 @@
-import { createCollection, localStorageCollectionOptions } from "@tanstack/react-db";
+import { createCollection, localStorageCollectionOptions } from "@tanstack/svelte-db";
 import { z } from "zod";
 
 const isoDate = z.iso.datetime();

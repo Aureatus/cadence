@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schemas/config.schema.json",
-  "entry": ["src/main.tsx", "src/router.tsx", "vite.config.ts", "playwright.config.ts"],
+  "entry": ["astro.config.mjs", "svelte.config.js", "playwright.config.ts"],
   "ignorePatterns": [
     "node_modules/**",
     "dist/**",

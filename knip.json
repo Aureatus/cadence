@@ -1,7 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["src/pages/**/*.astro"],
-  "project": ["src/**/*.{ts,tsx,astro}", "e2e/**/*.ts", "*.config.{ts,mjs,js}"],
+  "project": ["src/**/*.{ts,svelte,astro}", "e2e/**/*.ts", "*.config.{ts,mjs,js}"],
   "ignore": [],
-  "ignoreExportsUsedInFile": true
+  "ignoreExportsUsedInFile": true,
+  "svelte": {
+    "config": ["svelte.config.js"],
+    "entry": ["src/**/*.svelte", "src/**/*.svelte.ts"]
+  }
 }

@@ -1,5 +1,5 @@
 import { defineConfig } from "astro/config";
-import react from "@astrojs/react";
+import svelte from "@astrojs/svelte";
 import tailwindcss from "@tailwindcss/vite";
 import AstroPWA from "@vite-pwa/astro";
 import { fileURLToPath, URL } from "node:url";
@@ -7,7 +7,7 @@ import { fileURLToPath, URL } from "node:url";
 export default defineConfig({
   output: "static",
   integrations: [
-    react(),
+    svelte(),
     AstroPWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "pwa-source.svg", "apple-touch-icon-180x180.png"],

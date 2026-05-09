@@ -1,8 +1,8 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Header from "@/components/layout/Header.astro";
-import { AppRoot } from "@/features/app-root";
-import { DevSeedButton } from "@/features/dashboard/dev-seed-button";
+import AppRoot from "@/features/app-root.svelte";
+import DevSeedButton from "@/features/dashboard/dev-seed-button.svelte";
 ---
 
 <BaseLayout title="Cadence">
@@ -10,7 +10,7 @@ import { DevSeedButton } from "@/features/dashboard/dev-seed-button";
     class="relative z-[1] mx-auto min-h-svh w-full max-w-[2200px] overflow-x-clip px-5 pt-4 pb-16 md:px-11 md:pt-7 md:pb-20 xl:px-12 xl:pt-6 2xl:px-20 2xl:pt-10 2xl:pb-28 3xl:px-28 3xl:pt-12"
   >
     <Header />
-    <AppRoot client:only="react" />
-    {import.meta.env.DEV && <DevSeedButton client:only="react" />}
+    <AppRoot client:only="svelte" />
+    {import.meta.env.DEV && <DevSeedButton client:only="svelte" />}
   </main>
 </BaseLayout>

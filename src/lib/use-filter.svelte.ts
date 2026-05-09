@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { DEFAULT_FILTER, dashboardSearchSchema, type FilterKey } from "./filter";
 
 function readFilter(): FilterKey {
@@ -8,15 +7,15 @@ function readFilter(): FilterKey {
 }
 
 export function useFilter() {
-  const [filter, setFilterState] = useState<FilterKey>(() => readFilter());
+  let filter = $state<FilterKey>(readFilter());
 
-  useEffect(() => {
+  $effect(() => {
     function syncFromUrl() {
-      setFilterState(readFilter());
+      filter = readFilter();
     }
     window.addEventListener("popstate", syncFromUrl);
     return () => window.removeEventListener("popstate", syncFromUrl);
-  }, []);
+  });
 
   function setFilter(next: FilterKey) {
     if (typeof window === "undefined") return;
@@ -27,8 +26,13 @@ export function useFilter() {
       url.searchParams.set("filter", next);
     }
     window.history.replaceState({}, "", url.toString());
-    setFilterState(next);
+    filter = next;
   }
 
-  return [filter, setFilter] as const;
+  return {
+    get filter() {
+      return filter;
+    },
+    setFilter,
+  };
 }
