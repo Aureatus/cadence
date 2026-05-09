@@ -14,24 +14,6 @@ export default defineConfig({
     svelte(),
     shield({
       sri: { enableStatic: true },
-      securityHeaders: {
-        enableOnStaticPages: { provider: "netlify" },
-        contentSecurityPolicy: {
-          cspDirectives: {
-            "default-src": "'self'",
-            "script-src": "'self'",
-            "style-src": "'self' 'unsafe-inline'",
-            "img-src": "'self' data:",
-            "font-src": "'self'",
-            "connect-src": "'self'",
-            "manifest-src": "'self'",
-            "worker-src": "'self'",
-            "base-uri": "'self'",
-            "form-action": "'none'",
-            "frame-ancestors": "'none'",
-          },
-        },
-      },
     }),
     AstroPWA({
       registerType: "autoUpdate",
