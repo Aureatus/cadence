@@ -1,9 +1,9 @@
-import { z } from "zod";
+import * as v from "valibot";
 
-const filterSchema = z.enum(["due", "open", "logged", "all"]);
-export type FilterKey = z.infer<typeof filterSchema>;
+const filterSchema = v.picklist(["due", "open", "logged", "all"]);
+export type FilterKey = v.InferOutput<typeof filterSchema>;
 export const DEFAULT_FILTER: FilterKey = "due";
 
-export const dashboardSearchSchema = z.object({
-  filter: filterSchema.optional().catch(undefined),
+export const dashboardSearchSchema = v.object({
+  filter: v.fallback(v.optional(filterSchema), undefined),
 });

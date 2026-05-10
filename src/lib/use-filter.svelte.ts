@@ -1,9 +1,10 @@
+import * as v from "valibot";
 import { DEFAULT_FILTER, dashboardSearchSchema, type FilterKey } from "./filter";
 
 function readFilter(): FilterKey {
   if (typeof window === "undefined") return DEFAULT_FILTER;
   const raw = new URL(window.location.href).searchParams.get("filter");
-  return dashboardSearchSchema.parse({ filter: raw ?? undefined }).filter ?? DEFAULT_FILTER;
+  return v.parse(dashboardSearchSchema, { filter: raw ?? undefined }).filter ?? DEFAULT_FILTER;
 }
 
 export function useFilter() {

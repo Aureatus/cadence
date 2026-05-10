@@ -1,47 +1,47 @@
 import { createCollection, localStorageCollectionOptions } from "@tanstack/svelte-db";
-import { z } from "zod";
+import * as v from "valibot";
 
-const isoDate = z.iso.datetime();
+const isoDate = v.pipe(v.string(), v.isoTimestamp());
 
-const completionSchema = z.object({
+const completionSchema = v.object({
   completedAt: isoDate,
   dueAt: isoDate,
-  latenessMinutes: z.number().int(),
-  score: z.number().min(0).max(100),
+  latenessMinutes: v.pipe(v.number(), v.integer()),
+  score: v.pipe(v.number(), v.minValue(0), v.maxValue(100)),
 });
 
-const todoSchema = z.object({
-  id: z.string(),
-  cycleId: z.string(),
-  title: z.string().min(1),
-  notes: z.string().optional(),
-  status: z.enum(["active", "completed", "skipped"]),
+const todoSchema = v.object({
+  id: v.string(),
+  cycleId: v.string(),
+  title: v.pipe(v.string(), v.minLength(1)),
+  notes: v.optional(v.string()),
+  status: v.picklist(["active", "completed", "skipped"]),
   createdAt: isoDate,
   updatedAt: isoDate,
-  completedAt: isoDate.optional(),
-  deletedAt: isoDate.optional(),
-  frequencyPerDay: z.number().int().min(1).max(8),
-  minSpacingHours: z.number().min(0).max(24),
-  windowStart: z.string().regex(/^\d{2}:\d{2}$/),
-  windowEnd: z.string().regex(/^\d{2}:\d{2}$/),
-  graceMinutes: z.number().int().min(0).max(240),
-  daysOfWeek: z.array(z.number().int().min(0).max(6)).optional(),
-  completionLog: z.array(completionSchema),
+  completedAt: v.optional(isoDate),
+  deletedAt: v.optional(isoDate),
+  frequencyPerDay: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(8)),
+  minSpacingHours: v.pipe(v.number(), v.minValue(0), v.maxValue(24)),
+  windowStart: v.pipe(v.string(), v.regex(/^\d{2}:\d{2}$/)),
+  windowEnd: v.pipe(v.string(), v.regex(/^\d{2}:\d{2}$/)),
+  graceMinutes: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(240)),
+  daysOfWeek: v.optional(v.array(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(6)))),
+  completionLog: v.array(completionSchema),
 });
 
-const cycleSchema = z.object({
-  id: z.string(),
-  title: z.string().min(1),
+const cycleSchema = v.object({
+  id: v.string(),
+  title: v.pipe(v.string(), v.minLength(1)),
   startsAt: isoDate,
-  endsAt: isoDate.optional(),
-  status: z.enum(["active", "closed"]),
+  endsAt: v.optional(isoDate),
+  status: v.picklist(["active", "closed"]),
   createdAt: isoDate,
   updatedAt: isoDate,
 });
 
-export type Todo = z.infer<typeof todoSchema>;
-export type Completion = z.infer<typeof completionSchema>;
-export type Cycle = z.infer<typeof cycleSchema>;
+export type Todo = v.InferOutput<typeof todoSchema>;
+export type Completion = v.InferOutput<typeof completionSchema>;
+export type Cycle = v.InferOutput<typeof cycleSchema>;
 
 export const todosCollection = createCollection(
   localStorageCollectionOptions({
