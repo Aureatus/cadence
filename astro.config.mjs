@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import AstroPWA from "@vite-pwa/astro";
 import { shield } from "@kindspells/astro-shield";
 import { visualizer } from "rollup-plugin-visualizer";
+import preloadChunks from "./preload-chunks.ts";
 import { fileURLToPath, URL } from "node:url";
 
 const analyze = process.env.ANALYZE === "1";
@@ -18,6 +19,7 @@ export default defineConfig({
     shield({
       sri: { enableStatic: true },
     }),
+    preloadChunks(),
     AstroPWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "pwa-source.svg", "apple-touch-icon-180x180.png"],
