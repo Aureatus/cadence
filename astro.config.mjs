@@ -10,6 +10,9 @@ const analyze = process.env.ANALYZE === "1";
 
 export default defineConfig({
   output: "static",
+  build: {
+    inlineStylesheets: "always",
+  },
   integrations: [
     svelte(),
     shield({
