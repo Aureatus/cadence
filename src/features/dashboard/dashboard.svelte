@@ -15,10 +15,6 @@
   $effect(() => {
     ensureActiveCycle(activeCycle);
   });
-
-  const today = new Date();
-  const weekday = today.toLocaleDateString([], { weekday: "long" });
-  const dateLabel = today.toLocaleDateString([], { day: "numeric", month: "long" });
 </script>
 
 {#if !activeCycle}
@@ -28,20 +24,7 @@
     Preparing your first cycle...
   </Card>
 {:else}
-  <section
-    class="mt-4 flex justify-end border-b border-rule pb-5 md:mt-5 md:pb-6"
-  >
-    <div
-      class="font-mono text-[10px] uppercase leading-[1.7] tracking-[0.16em] text-foam opacity-75 md:text-[11px] md:tracking-[0.22em] lg:text-right"
-    >
-      {weekday} · <b class="font-medium text-moon-2">{dateLabel}</b>
-      <br />
-      Cycle <b class="font-medium text-moon-2">{activeCycle.title}</b>
-      <br />
-      Local-first · <b class="font-medium text-moon-2">offline ready</b>
-    </div>
-  </section>
-  <TideStage cycle={activeCycle} {stats} />
+  <TideStage {stats} />
   <CurrentCycleWorkspace
     cycle={activeCycle}
     todos={stats.orderedTodos}

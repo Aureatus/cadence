@@ -1,12 +1,10 @@
 <script lang="ts">
-  import type { Cycle } from "@/db";
   import { formatClock, type DashboardStats } from "@/lib/cadence";
-  import { getDueState } from "@/time";
   import DayDial from "./day-dial.svelte";
 
-  type Props = { cycle: Cycle; stats: DashboardStats };
+  type Props = { stats: DashboardStats };
 
-  let { cycle, stats }: Props = $props();
+  let { stats }: Props = $props();
 
   const nextTodo = $derived(stats.orderedTodos[0]);
   const kept = $derived(
@@ -15,10 +13,6 @@
   const possible = $derived(
     Math.max(kept + stats.activeCount + stats.skippedCount, stats.activeCount),
   );
-  const nextDue = $derived(
-    stats.orderedTodos[0] ? getDueState(stats.orderedTodos[0]).dueAt : undefined,
-  );
-  const missed = $derived(stats.skippedCount);
 
   let now = $state(new Date());
   $effect(() => {
@@ -28,7 +22,7 @@
 </script>
 
 <section
-  class="mt-6 grid items-center gap-7 md:mt-8 md:gap-8 xl:mt-9 xl:grid-cols-[minmax(0,1fr)_280px] xl:gap-11"
+  class="mt-8 grid items-center gap-8 md:mt-10 md:gap-10 xl:mt-12 xl:grid-cols-[minmax(0,1fr)_minmax(180px,220px)] xl:gap-12"
 >
   <div
     aria-label={`Average adherence score ${stats.score}`}
@@ -61,58 +55,16 @@
     </div>
   </div>
   <aside
-    class="grid grid-cols-3 gap-0 border-t border-rule pt-5 md:pt-7 xl:flex xl:flex-col xl:gap-5 xl:border-t-0 xl:pt-0"
+    class="flex flex-col items-center gap-1 xl:items-start xl:border-l xl:border-rule xl:pl-10"
   >
-    <div
-      class="min-w-0 overflow-hidden border-l border-rule px-2.5 first:border-l-0 first:pl-0 last:pr-0 md:px-6 xl:border-l-0 xl:border-t xl:border-rule xl:px-0 xl:py-5 xl:first:border-t-0 xl:first:pt-0"
+    <span class="font-mono text-[10px] uppercase tracking-[0.22em] text-foam opacity-65">
+      Streak
+    </span>
+    <span
+      class="font-display text-[clamp(64px,8vw,112px)] font-medium leading-[0.85] tracking-[-0.025em] text-coral-2 tabular-nums"
     >
-      <div class="mb-2.5 font-mono text-[9px] uppercase tracking-[0.14em] text-foam opacity-60">
-        tonight closes at
-      </div>
-      <div
-        class="font-display text-[clamp(26px,4vw,56px)] font-medium leading-[0.88] tracking-[-0.018em] text-moon-2 tabular-nums"
-      >
-        22:30
-      </div>
-      <div
-        class="mt-1.5 line-clamp-2 font-display text-[clamp(11px,1.2vw,17px)] leading-[1.3] text-foam opacity-80"
-      >
-        {stats.activeCount} active
-      </div>
-    </div>
-    <div
-      class="min-w-0 overflow-hidden border-l border-rule px-2.5 first:border-l-0 first:pl-0 last:pr-0 md:px-6 xl:border-l-0 xl:border-t xl:border-rule xl:px-0 xl:py-5 xl:first:border-t-0 xl:first:pt-0"
-    >
-      <div class="mb-2.5 font-mono text-[9px] uppercase tracking-[0.14em] text-foam opacity-60">
-        steady streak
-      </div>
-      <div
-        class="font-display text-[clamp(26px,4vw,56px)] font-medium leading-[0.88] tracking-[-0.018em] text-moon-2"
-      >
-        <span class="text-coral-2">{stats.streakDays}</span> days
-      </div>
-      <div
-        class="mt-1.5 line-clamp-2 font-display text-[clamp(11px,1.2vw,17px)] leading-[1.3] text-foam opacity-80"
-      >
-        {cycle.title}
-      </div>
-    </div>
-    <div
-      class="min-w-0 overflow-hidden border-l border-rule px-2.5 first:border-l-0 first:pl-0 last:pr-0 md:px-6 xl:border-l-0 xl:border-t xl:border-rule xl:px-0 xl:py-5 xl:first:border-t-0 xl:first:pt-0"
-    >
-      <div class="mb-2.5 font-mono text-[9px] uppercase tracking-[0.14em] text-foam opacity-60">
-        next return
-      </div>
-      <div
-        class="font-display text-[clamp(26px,4vw,56px)] font-medium leading-[0.88] tracking-[-0.018em] text-moon-2 tabular-nums"
-      >
-        {nextDue ? formatClock(nextDue) : "--:--"}
-      </div>
-      <div
-        class="mt-1.5 line-clamp-2 font-display text-[clamp(11px,1.2vw,17px)] leading-[1.3] text-foam opacity-80"
-      >
-        {missed ? `${missed} missed this cycle` : "No misses"}
-      </div>
-    </div>
+      {stats.streakDays}
+    </span>
+    <span class="font-mono text-[11px] uppercase tracking-[0.2em] text-foam/65">days</span>
   </aside>
 </section>
