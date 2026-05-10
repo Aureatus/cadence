@@ -41,7 +41,6 @@
       </span>
       <span
         class="font-display text-[clamp(56px,12vw,116px)] font-normal italic leading-[0.88] tracking-[-0.025em] text-moon-2 tabular-nums"
-        style="text-shadow: 0 0 28px oklch(85% 0.06 80 / 0.25);"
       >
         {formatClock(now)}
       </span>
