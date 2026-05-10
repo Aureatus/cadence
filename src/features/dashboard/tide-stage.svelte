@@ -50,10 +50,9 @@
       <span
         class="mt-2 inline-flex max-w-[82%] items-center gap-2.5 truncate rounded-full border border-rule-2 bg-[oklch(20%_0.03_220/0.32)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-foam backdrop-blur-md md:px-4 md:py-2 md:text-[11px]"
       >
-        <span
-          aria-hidden="true"
-          class="block size-1.5 shrink-0 rounded-full bg-coral animate-tide-pulse"
-        ></span>
+        <span aria-hidden="true" class="relative block size-1.5 shrink-0 rounded-full bg-coral">
+          <span class="absolute inset-0 rounded-full bg-coral animate-tide-pulse"></span>
+        </span>
         next:
         <b class="font-medium normal-case text-sand">
           {nextTodo ? nextTodo.title : "Add a cadence"}
