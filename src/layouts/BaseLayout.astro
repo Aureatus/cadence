@@ -1,7 +1,7 @@
 ---
 import "@/index.css";
-import cormorantNormal from "@fontsource/cormorant-garamond/files/cormorant-garamond-latin-400-normal.woff2?url";
-import cormorantItalic from "@fontsource/cormorant-garamond/files/cormorant-garamond-latin-400-italic.woff2?url";
+import jetbrainsNormal from "@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2?url";
+import jetbrainsItalic from "@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-italic.woff2?url";
 
 interface Props {
   title?: string;
@@ -21,8 +21,8 @@ const {
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/svg+xml" href="/pwa-source.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
-    <link rel="preload" as="font" type="font/woff2" href={cormorantNormal} crossorigin />
-    <link rel="preload" as="font" type="font/woff2" href={cormorantItalic} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={jetbrainsNormal} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={jetbrainsItalic} crossorigin />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ef6f35" />
     <meta name="description" content={description} />

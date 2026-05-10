@@ -23,9 +23,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@fontsource/cormorant-garamond": "^5.2.11",
-    "@fontsource/dm-mono": "^5.2.7",
-    "@fontsource/dm-sans": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
     "@tanstack/svelte-db": "^0.1.82",
     "bits-ui": "^2.18.1",
     "class-variance-authority": "^0.7.1",
