@@ -9,3 +9,5 @@ test-results
 report
 .fallow
 *.tsbuildinfo
+.env
+.env.local
