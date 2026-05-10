@@ -41,14 +41,10 @@
       Local-first · <b class="font-medium text-moon-2">offline ready</b>
     </div>
   </section>
-  <div
-    class="2xl:grid 2xl:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] 2xl:items-start 2xl:gap-12 3xl:gap-16"
-  >
-    <TideStage cycle={activeCycle} {stats} />
-    <CurrentCycleWorkspace
-      cycle={activeCycle}
-      todos={stats.orderedTodos}
-      settledTodos={stats.cycleTodos.filter((todo) => todo.status === "skipped")}
-    />
-  </div>
+  <TideStage cycle={activeCycle} {stats} />
+  <CurrentCycleWorkspace
+    cycle={activeCycle}
+    todos={stats.orderedTodos}
+    settledTodos={stats.cycleTodos.filter((todo) => todo.status === "skipped")}
+  />
 {/if}

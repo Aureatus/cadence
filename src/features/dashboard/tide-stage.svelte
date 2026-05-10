@@ -32,7 +32,7 @@
 >
   <div
     aria-label={`Average adherence score ${stats.score}`}
-    class="relative mx-auto aspect-square w-full max-w-[353px] [&_svg]:size-full [&_svg]:overflow-visible md:max-w-[640px] xl:max-w-[580px]"
+    class="relative mx-auto aspect-square w-full max-w-[353px] [&_svg]:size-full [&_svg]:overflow-visible md:max-w-[640px] xl:max-w-[640px] 2xl:max-w-[720px]"
   >
     <DayDial todos={stats.orderedTodos} />
     <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1">
