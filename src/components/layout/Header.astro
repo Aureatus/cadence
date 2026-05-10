@@ -13,7 +13,9 @@ const navLinks = [
   <a href="/" class="flex min-w-0 max-w-full items-center gap-4 text-moon no-underline">
     <span class="moon-mark size-9 md:size-[46px]" aria-hidden="true"></span>
     <span class="min-w-0">
-      <span class="block font-display text-[22px] italic leading-[0.85] tracking-[-0.005em] md:text-4xl">
+      <span
+        class="block font-display text-[22px] font-medium leading-[0.85] tracking-[-0.02em] md:text-3xl"
+      >
         Cadence
       </span>
       <span class="mt-1 block font-mono text-[9px] uppercase tracking-[0.16em] text-foam opacity-60 md:text-[10px] md:tracking-[0.26em]">
@@ -34,8 +36,8 @@ const navLinks = [
             href={item.to}
             data-status={active ? "active" : "inactive"}
             class:list={[
-              "group/tab relative min-w-0 flex-1 truncate text-center font-display italic leading-tight no-underline transition-colors md:flex-initial md:px-4",
-              "text-[clamp(14px,4.4vw,18px)] text-moon/40 hover:text-moon-2 md:text-[22px]",
+              "group/tab relative min-w-0 flex-1 truncate text-center font-display font-medium leading-tight no-underline transition-colors md:flex-initial md:px-4",
+              "text-[clamp(13px,3.6vw,16px)] text-moon/40 hover:text-moon-2 md:text-[18px]",
               "data-[status=active]:text-moon-2",
               i > 0 &&
                 "before:pointer-events-none before:absolute before:inset-y-[18%] before:left-0 before:w-px before:bg-foam/20 md:before:hidden",

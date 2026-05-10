@@ -344,7 +344,7 @@
   });
 
   const tokenInputClass =
-    "appearance-none border-0 bg-transparent font-[inherit] text-inherit italic outline-none focus:text-moon-2";
+    "appearance-none border-0 bg-transparent font-[inherit] font-medium text-inherit outline-none focus:text-moon-2";
 </script>
 
 <form class="grid gap-5" onsubmit={handleSubmit}>
@@ -355,7 +355,7 @@
         for="cad-title"
         class="font-mono text-[10px] uppercase tracking-[0.28em] text-foam/55"
       >
-        the task
+        Task
       </label>
       <!-- svelte-ignore a11y_autofocus -->
       <input
@@ -372,9 +372,7 @@
         for="cad-notes"
         class="font-mono text-[10px] uppercase tracking-[0.22em] text-foam/55"
       >
-        a note <span class="text-[0.9em] tracking-normal normal-case opacity-70 italic"
-          >(optional)</span
-        >
+        Note <span class="text-[0.9em] tracking-normal normal-case opacity-70">(optional)</span>
       </label>
       <textarea
         id="cad-notes"
@@ -385,7 +383,7 @@
     </div>
   </div>
 
-  <p class="font-mono text-[10px] uppercase tracking-[0.28em] text-foam/55">the rhythm</p>
+  <p class="font-mono text-[10px] uppercase tracking-[0.28em] text-foam/55">Rhythm</p>
 
   <!-- preset grid -->
   <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-5">
@@ -408,7 +406,7 @@
         />
         <h3
           class={cn(
-            "font-display text-base leading-tight italic transition-colors sm:text-lg",
+            "font-display text-base font-medium leading-tight tracking-tight transition-colors sm:text-lg",
             active ? "text-moon-2" : "text-moon group-hover/card:text-moon-2",
           )}
         >
@@ -429,14 +427,14 @@
   <!-- selection summary -->
   <div class="grid gap-3 border-y border-rule py-4">
     <p class="font-mono text-[10px] uppercase tracking-[0.22em] text-foam/55">
-      {activePreset ? `selected · ${activePreset.label}` : "custom shape"}
+      {activePreset ? `Preset · ${activePreset.label}` : "Custom"}
     </p>
     <p
       class="font-display text-[clamp(18px,2.2vw,24px)] leading-[1.55] tracking-[-0.005em] text-pretty text-moon-2"
     >
       Return to it
       <span
-        class="mx-0.5 inline-flex items-baseline border-b-[1.5px] border-dotted border-coral/50 px-1 pb-px italic text-coral transition-colors hover:border-coral-2 hover:text-coral-2 focus-within:border-solid focus-within:border-moon-2 focus-within:text-moon-2"
+        class="mx-0.5 inline-flex items-baseline border-b-[1.5px] border-dotted border-coral/50 px-1 pb-px font-medium text-coral transition-colors hover:border-coral-2 hover:text-coral-2 focus-within:border-solid focus-within:border-moon-2 focus-within:text-moon-2"
       >
         <input
           type="number"
@@ -455,7 +453,7 @@
       </span>
       × per day, between
       <span
-        class="mx-0.5 inline-flex items-baseline border-b-[1.5px] border-dotted border-coral/50 px-1 pb-px italic text-coral transition-colors hover:border-coral-2 hover:text-coral-2 focus-within:border-solid focus-within:border-moon-2 focus-within:text-moon-2"
+        class="mx-0.5 inline-flex items-baseline border-b-[1.5px] border-dotted border-coral/50 px-1 pb-px font-medium text-coral transition-colors hover:border-coral-2 hover:text-coral-2 focus-within:border-solid focus-within:border-moon-2 focus-within:text-moon-2"
       >
         <input
           type="time"
@@ -473,7 +471,7 @@
       </span>
       and
       <span
-        class="mx-0.5 inline-flex items-baseline border-b-[1.5px] border-dotted border-coral/50 px-1 pb-px italic text-coral transition-colors hover:border-coral-2 hover:text-coral-2 focus-within:border-solid focus-within:border-moon-2 focus-within:text-moon-2"
+        class="mx-0.5 inline-flex items-baseline border-b-[1.5px] border-dotted border-coral/50 px-1 pb-px font-medium text-coral transition-colors hover:border-coral-2 hover:text-coral-2 focus-within:border-solid focus-within:border-moon-2 focus-within:text-moon-2"
       >
         <input
           type="time"
@@ -491,7 +489,7 @@
       </span>
       , with
       <span
-        class="mx-0.5 inline-flex items-baseline border-b-[1.5px] border-dotted border-coral/50 px-1 pb-px italic text-coral transition-colors hover:border-coral-2 hover:text-coral-2 focus-within:border-solid focus-within:border-moon-2 focus-within:text-moon-2"
+        class="mx-0.5 inline-flex items-baseline border-b-[1.5px] border-dotted border-coral/50 px-1 pb-px font-medium text-coral transition-colors hover:border-coral-2 hover:text-coral-2 focus-within:border-solid focus-within:border-moon-2 focus-within:text-moon-2"
       >
         <input
           type="number"
@@ -523,7 +521,7 @@
             aria-pressed={active}
             aria-label={label}
             class={cn(
-              "inline-flex h-7 w-9 cursor-pointer items-center justify-center rounded-full border font-display text-sm italic transition-colors",
+              "inline-flex h-7 w-9 cursor-pointer items-center justify-center rounded-full border font-display text-xs font-medium tracking-wide transition-colors",
               active
                 ? "border-coral bg-coral/15 text-coral-2"
                 : "border-rule-2 bg-transparent text-foam/55 hover:border-coral/60 hover:text-moon-2",
@@ -588,15 +586,14 @@
   <footer
     class="mt-2 flex flex-col gap-3 border-t border-rule pt-5 sm:flex-row sm:items-center sm:justify-between"
   >
-    <p class="font-display text-base italic text-foam/85">
-      Press
-      <kbd class="mx-1 rounded border border-rule-2 px-1.5 py-0.5 font-mono text-[11px] text-moon"
+    <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-foam/65">
+      <kbd class="mx-0.5 rounded border border-rule-2 px-1.5 py-0.5 font-mono text-[10px] text-moon"
         >⌘</kbd
       >
-      <kbd class="mx-1 rounded border border-rule-2 px-1.5 py-0.5 font-mono text-[11px] text-moon"
+      <kbd class="mx-0.5 rounded border border-rule-2 px-1.5 py-0.5 font-mono text-[10px] text-moon"
         >↵</kbd
       >
-      to save.
+      to save
     </p>
     <div class="flex justify-end gap-2.5">
       <Button type="button" variant="tide-ghost" size="pill" onclick={onClose}>Cancel</Button>

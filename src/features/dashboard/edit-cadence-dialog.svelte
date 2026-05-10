@@ -27,12 +27,12 @@
       <DialogDescription
         class="font-mono text-[10px] uppercase tracking-[0.28em] text-foam opacity-65"
       >
-        edit cadence
+        Edit
       </DialogDescription>
       <DialogTitle
-        class="font-display text-[clamp(36px,5vw,56px)] font-normal not-italic normal-case leading-[0.95] tracking-[-0.012em] text-moon-2"
+        class="font-display text-[clamp(24px,3vw,32px)] font-medium leading-[1.05] tracking-[-0.012em] text-moon-2"
       >
-        Reshape <em class="italic text-sand-2">it</em>.
+        Edit cadence
       </DialogTitle>
     </DialogHeader>
     {#if todo}

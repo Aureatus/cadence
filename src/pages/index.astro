@@ -10,11 +10,6 @@ import DevSeedButton from "@/features/dashboard/dev-seed-button.svelte";
     class="relative z-[1] mx-auto min-h-svh w-full max-w-[2200px] overflow-x-clip px-5 pt-4 pb-16 md:px-11 md:pt-7 md:pb-20 xl:px-12 xl:pt-6 2xl:px-20 2xl:pt-10 2xl:pb-28 3xl:px-28 3xl:pt-12"
   >
     <Header />
-    <h1
-      class="mt-7 max-w-[1100px] font-display text-[clamp(48px,9vw,144px)] font-normal leading-[0.92] tracking-[-0.012em] text-balance text-moon-2 md:mt-8"
-    >
-      The day is <em class="italic text-sand-2">turning</em>.
-    </h1>
     <AppRoot client:only="svelte" />
     {import.meta.env.DEV && <DevSeedButton client:only="svelte" />}
   </main>

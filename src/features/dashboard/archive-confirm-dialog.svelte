@@ -27,13 +27,13 @@
   >
     <AlertDialogHeader class="gap-2 sm:place-items-start sm:text-left">
       <AlertDialogTitle
-        class="font-display text-[clamp(24px,3vw,32px)] font-normal not-italic normal-case leading-[1.05] tracking-[-0.012em] text-moon-2"
+        class="font-display text-[clamp(20px,2.4vw,26px)] font-medium leading-[1.1] tracking-[-0.012em] text-moon-2"
       >
-        Archive <em class="italic text-sand-2">{todo?.title ?? "this cadence"}</em>?
+        Archive <span class="text-sand-2">{todo?.title ?? "this cadence"}</span>?
       </AlertDialogTitle>
       <AlertDialogDescription class="text-sm leading-relaxed text-foam/80">
-        It moves to <span class="text-moon">Settled</span>, where you can restore it anytime. Past
-        completions stay in the ledger.
+        Moves to <span class="text-moon">Settled</span>. Restore anytime; past completions stay in
+        history.
       </AlertDialogDescription>
     </AlertDialogHeader>
     <AlertDialogFooter>

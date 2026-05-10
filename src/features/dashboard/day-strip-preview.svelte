@@ -122,9 +122,7 @@
 
 <div class="my-6 rounded-xl border border-rule bg-[oklch(12%_0.02_220/0.5)] p-5 sm:p-6">
   <div class="mb-4 flex items-baseline justify-between gap-3">
-    <h3 class="font-display text-xl font-normal italic text-moon-2">
-      The day, as you've shaped it.
-    </h3>
+    <h3 class="font-display text-base font-medium tracking-tight text-moon-2">Day shape</h3>
     <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-foam/70">
       {@render summary()}
     </p>
@@ -330,7 +328,7 @@
     </div>
   </div>
   {#if warning}
-    <p role="alert" class="mt-2 font-display text-sm italic text-rose">{warning}</p>
+    <p role="alert" class="mt-2 font-display text-sm text-rose">{warning}</p>
   {/if}
   {#if onAddOccurrence}
     <p class="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-foam/45">

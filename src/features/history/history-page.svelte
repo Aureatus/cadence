@@ -18,13 +18,11 @@
   class="mt-7 border border-rule bg-[oklch(20%_0.03_220/0.22)] gap-5 rounded-3xl px-5 py-6 ring-0 backdrop-blur-md md:px-7 md:py-7"
 >
   <CardHeader class="px-0">
-    <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-foam opacity-65">
-      cycle history
-    </p>
+    <p class="font-mono text-[10px] uppercase tracking-[0.24em] text-foam opacity-65">history</p>
     <h1
-      class="mt-2 font-display text-[clamp(32px,4.5vw,52px)] font-normal italic leading-[0.92] text-moon-2 normal-case tracking-[-0.012em]"
+      class="mt-2 font-display text-[clamp(24px,3.2vw,36px)] font-medium leading-[1] text-moon-2 tracking-[-0.012em]"
     >
-      Consistency <em class="text-sand-2">ledger</em>.
+      Consistency
     </h1>
   </CardHeader>
   <CardContent class="px-0">

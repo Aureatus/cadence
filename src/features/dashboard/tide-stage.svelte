@@ -40,12 +40,12 @@
         it is
       </span>
       <span
-        class="font-display text-[clamp(56px,12vw,116px)] font-normal italic leading-[0.88] tracking-[-0.025em] text-moon-2 tabular-nums"
+        class="font-display text-[clamp(56px,12vw,116px)] font-medium leading-[0.88] tracking-[-0.025em] text-moon-2 tabular-nums"
       >
         {formatClock(now)}
       </span>
-      <span class="mt-1 font-display text-[clamp(13px,1.4vw,18px)] italic text-foam">
-        <b class="font-medium not-italic text-sand">{kept}</b> of {possible} returns kept
+      <span class="mt-1 font-display text-[clamp(13px,1.4vw,18px)] text-foam">
+        <b class="font-medium text-sand">{kept}</b> of {possible} kept
       </span>
       <span
         class="mt-2 inline-flex max-w-[82%] items-center gap-2.5 truncate rounded-full border border-rule-2 bg-[oklch(20%_0.03_220/0.32)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-foam backdrop-blur-md md:px-4 md:py-2 md:text-[11px]"
@@ -70,14 +70,14 @@
         tonight closes at
       </div>
       <div
-        class="font-display text-[clamp(26px,4vw,56px)] font-normal leading-[0.88] tracking-[-0.018em] text-moon-2"
+        class="font-display text-[clamp(26px,4vw,56px)] font-medium leading-[0.88] tracking-[-0.018em] text-moon-2 tabular-nums"
       >
         22:30
       </div>
       <div
-        class="mt-1.5 line-clamp-2 font-display text-[clamp(11px,1.2vw,17px)] italic leading-[1.3] text-foam opacity-80"
+        class="mt-1.5 line-clamp-2 font-display text-[clamp(11px,1.2vw,17px)] leading-[1.3] text-foam opacity-80"
       >
-        {stats.activeCount} cadences in motion.
+        {stats.activeCount} active
       </div>
     </div>
     <div
@@ -87,14 +87,14 @@
         steady streak
       </div>
       <div
-        class="font-display text-[clamp(26px,4vw,56px)] font-normal leading-[0.88] tracking-[-0.018em] text-moon-2"
+        class="font-display text-[clamp(26px,4vw,56px)] font-medium leading-[0.88] tracking-[-0.018em] text-moon-2"
       >
-        <em class="not-italic text-coral-2">{stats.streakDays}</em> days
+        <span class="text-coral-2">{stats.streakDays}</span> days
       </div>
       <div
-        class="mt-1.5 line-clamp-2 font-display text-[clamp(11px,1.2vw,17px)] italic leading-[1.3] text-foam opacity-80"
+        class="mt-1.5 line-clamp-2 font-display text-[clamp(11px,1.2vw,17px)] leading-[1.3] text-foam opacity-80"
       >
-        {cycle.title} keeps its tide.
+        {cycle.title}
       </div>
     </div>
     <div
@@ -104,16 +104,14 @@
         next return
       </div>
       <div
-        class="font-display text-[clamp(26px,4vw,56px)] font-normal leading-[0.88] tracking-[-0.018em] text-moon-2"
+        class="font-display text-[clamp(26px,4vw,56px)] font-medium leading-[0.88] tracking-[-0.018em] text-moon-2 tabular-nums"
       >
         {nextDue ? formatClock(nextDue) : "--:--"}
       </div>
       <div
-        class="mt-1.5 line-clamp-2 font-display text-[clamp(11px,1.2vw,17px)] italic leading-[1.3] text-foam opacity-80"
+        class="mt-1.5 line-clamp-2 font-display text-[clamp(11px,1.2vw,17px)] leading-[1.3] text-foam opacity-80"
       >
-        {missed
-          ? `${missed} skipped this cycle. Forgive it; carry on.`
-          : "No misses logged this cycle."}
+        {missed ? `${missed} missed this cycle` : "No misses"}
       </div>
     </div>
   </aside>

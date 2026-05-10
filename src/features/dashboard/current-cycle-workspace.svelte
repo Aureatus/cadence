@@ -119,9 +119,9 @@
   <div class="flex flex-col gap-3.5 border-b border-rule pt-10 pb-3.5">
     <div class="flex items-end justify-between gap-4">
       <h2
-        class="font-display text-[clamp(32px,4.5vw,52px)] font-normal italic leading-[0.92] tracking-[-0.012em] text-moon-2"
+        class="font-display text-[clamp(24px,3.2vw,36px)] font-medium leading-[0.92] tracking-[-0.012em] text-moon-2"
       >
-        The <em class="text-sand-2">currents</em>.
+        Active
       </h2>
       <button
         type="button"
@@ -181,12 +181,12 @@
     {:else if filteredTodos.length === 0}
       {#if filterStore.filter === "due"}
         <div class="mt-8 flex flex-col items-start gap-2">
-          <p class="font-display text-[clamp(22px,2.4vw,30px)] italic leading-tight text-moon-2">
-            The tide&rsquo;s at <em class="text-sand-2">rest</em>.
+          <p class="font-display text-[clamp(20px,2vw,24px)] font-medium leading-tight text-moon-2">
+            Nothing due now
           </p>
           {#if filterEmptyNext}
             <p class="font-mono text-[11px] tracking-[0.22em] text-foam/65 uppercase">
-              Next return ·{" "}
+              Next ·{" "}
               <span class="text-coral normal-case tracking-normal">{filterEmptyNext.todo.title}</span>
               {" "}
               <span class="text-foam/55 normal-case tracking-normal">
@@ -195,13 +195,13 @@
             </p>
           {:else}
             <p class="font-mono text-[11px] tracking-[0.22em] text-foam/65 uppercase">
-              Nothing returning today.
+              Nothing today
             </p>
           {/if}
         </div>
       {:else}
         <p class="mt-6 font-mono text-[11px] tracking-[0.22em] text-foam/65 uppercase">
-          Nothing matches &lsquo;{activeLabel}&rsquo; right now.
+          No matches for &lsquo;{activeLabel}&rsquo;
         </p>
       {/if}
     {:else}
@@ -229,7 +229,7 @@
             <li
               class="flex items-center justify-between gap-3 rounded-md border border-rule/80 bg-[oklch(15%_0.02_220/0.4)] px-3 py-2 transition-colors"
             >
-              <span class="min-w-0 truncate font-display text-base italic text-foam/80">
+              <span class="min-w-0 truncate font-display text-base text-foam/80">
                 {todo.title}
               </span>
               <button

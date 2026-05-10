@@ -20,12 +20,6 @@
   const isDue = $derived(presentation.rowTone === "due");
   const isDone = $derived(presentation.rowTone === "done");
 
-  const titleParts = $derived.by(() => {
-    const words = todo.title.trim().split(/\s+/);
-    if (words.length <= 1) return { lead: "", last: todo.title };
-    return { lead: words.slice(0, -1).join(" "), last: words.at(-1) ?? "" };
-  });
-
   const total = $derived(Math.max(1, Math.min(8, todo.frequencyPerDay)));
   const completed = $derived(Math.min(todo.completionLog.length, total));
   const currentClass = $derived(due.isLate ? "miss" : "now");
@@ -56,7 +50,7 @@
   <div
     aria-hidden="true"
     class={cn(
-      "row-span-2 flex size-9 items-center justify-center self-start rounded-full border border-rule-2 bg-[oklch(20%_0.03_220/0.3)] font-display text-base italic text-foam md:row-span-1 md:size-11 md:self-center md:text-[20px]",
+      "row-span-2 flex size-9 items-center justify-center self-start rounded-full border border-rule-2 bg-[oklch(20%_0.03_220/0.3)] font-display text-base font-medium text-foam md:row-span-1 md:size-11 md:self-center md:text-[20px]",
       isDue && "border-coral bg-coral text-moon-2",
       isDone && "border-foam bg-foam text-deep",
     )}
@@ -65,16 +59,12 @@
   </div>
   <div class="col-start-2 min-w-0">
     <div
-      class="font-display text-[clamp(20px,2.6vw,38px)] font-normal leading-tight tracking-[-0.012em] text-moon-2"
+      class="font-display text-[clamp(18px,2vw,28px)] font-medium leading-tight tracking-[-0.012em] text-moon-2"
     >
-      {#if titleParts.lead}
-        {titleParts.lead}{" "}<em class="italic">{titleParts.last}</em>
-      {:else}
-        {todo.title}
-      {/if}
+      {todo.title}
       {#if todo.notes}
         <span
-          class="mt-1 block font-display text-[clamp(11px,1.05vw,15px)] italic leading-[1.4] tracking-[0.04em] text-foam opacity-75"
+          class="mt-1 block font-display text-[clamp(11px,1.05vw,14px)] font-normal leading-[1.4] tracking-[0.01em] text-foam opacity-70"
         >
           {todo.notes}
         </span>
@@ -84,15 +74,15 @@
   <div
     class="col-start-2 row-start-2 flex flex-row flex-wrap items-baseline gap-2.5 font-mono text-[10px] uppercase tracking-[0.1em] text-moon/65 md:col-start-3 md:row-start-1 md:block md:text-[11px]"
   >
-    <span>{todo.frequencyPerDay}x/day cadence</span>
+    <span>{todo.frequencyPerDay}×/day</span>
     <span
-      class="block font-display text-[12px] not-italic font-normal tabular-nums text-sand md:mt-1 md:text-[22px] md:leading-tight"
+      class="block font-display text-[12px] font-medium tabular-nums text-sand md:mt-1 md:text-[20px] md:leading-tight"
     >
-      <em class="italic">{formatWhen(due.dueAt)}</em>
+      {formatWhen(due.dueAt)}
     </span>
     <span class={cn(due.isLate && "text-rose")}>{presentation.impact}</span>
-    <span class="hidden md:inline">{due.adherenceScore}% if done now</span>
-    <span class="hidden md:inline">Next after complete {formatWhen(due.nextDueAt)}</span>
+    <span class="hidden md:inline">{due.adherenceScore}% if done</span>
+    <span class="hidden md:inline">Next {formatWhen(due.nextDueAt)}</span>
   </div>
   <div aria-hidden="true" class="hidden items-center gap-1.5 xl:flex">
     {#each bars as bar (bar.key)}

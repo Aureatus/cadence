@@ -42,14 +42,14 @@ test("creates a cyclic todo, completes an occurrence, and persists collection da
 }) => {
   await openApp(page, "/", baseNow);
 
-  await expect(page.getByRole("heading", { name: "The day is turning." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Cadence" })).toBeVisible();
   await expect(page.getByText("No active cadences yet")).toBeVisible();
 
   await page.getByRole("button", { name: "Add cadence" }).click();
   const dialog = page.locator("[data-slot='dialog-content']");
   await expect(dialog).toBeVisible();
-  await dialog.getByLabel("The task").fill("Hydration pulse");
-  await dialog.getByLabel("A note").fill("Drink water before the next deep work block.");
+  await dialog.getByLabel("Task").fill("Hydration pulse");
+  await dialog.getByLabel("Note").fill("Drink water before the next deep work block.");
   await dialog.getByLabel("Times per day").fill("3");
   await dialog.getByLabel("Window start").fill("00:00");
   await dialog.getByLabel("Window end").fill("23:59");
@@ -59,8 +59,8 @@ test("creates a cyclic todo, completes an occurrence, and persists collection da
 
   const card = page.getByRole("article", { name: "Todo: Hydration pulse" });
   await expect(card).toBeVisible();
-  await expect(card.getByText("3x/day cadence")).toBeVisible();
-  await expect(card.getByText("Next after complete")).toBeVisible();
+  await expect(card.getByText("3×/day")).toBeVisible();
+  await expect(card.getByText(/^Next /)).toBeVisible();
 
   const createdTodos = await readCollection<TodoRecord>(page, "cadence.todos");
   expect(createdTodos).toHaveLength(1);
@@ -123,7 +123,7 @@ test("keeps an uncompleted occurrence overdue and shows lateness impact", async 
 
   const card = page.getByRole("article", { name: "Todo: Brush teeth" });
   await expect(card.getByText("1h 15m late")).toBeVisible();
-  await expect(card.getByText("55% if done now")).toBeVisible();
+  await expect(card.getByText("55% if done")).toBeVisible();
 
   await card.getByRole("button", { name: "Mark complete" }).click();
   const todos = await readCollection<TodoRecord>(page, "cadence.todos");
@@ -175,7 +175,7 @@ test("keeps after-midnight due times inside overnight windows", async ({ page })
 
   const card = page.getByRole("article", { name: "Todo: Night medication" });
   await expect(card.getByText("due now")).toBeVisible();
-  await expect(card.getByText("100% if done now")).toBeVisible();
+  await expect(card.getByText("100% if done")).toBeVisible();
   await expect(card.getByText("Tue 2:00 AM")).toBeVisible();
 });
 
