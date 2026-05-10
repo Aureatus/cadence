@@ -30,6 +30,8 @@ jobs:
 
       - run: bun run check
 
+      - run: bun run test
+
       - run: bunx playwright install --with-deps chromium
 
       - run: bun run test:e2e

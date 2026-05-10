@@ -20,6 +20,7 @@
     "check:fallow:full": "fallow --fail-on-issues",
     "check": "bun run format:check && bun run lint && bun run check:knip && bun run check:jscpd && bun run check:fallow && bun run check:fallow:health",
     "preview": "astro preview",
+    "test": "TZ=UTC bun test src/ --conditions svelte",
     "test:e2e": "playwright test"
   },
   "dependencies": {
