@@ -8,6 +8,7 @@ const app = await alchemy("cadence", {
 
 export const site = await Astro("cadence-site", {
   name: "cadence",
+  adopt: true,
 });
 
 console.log(`deployed → ${site.url}`);
