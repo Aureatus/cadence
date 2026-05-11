@@ -324,6 +324,45 @@
   animation: var(--animate-dial-due-ping);
 }
 
+.cadence-sheet-night {
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 90% 45% at 50% 0%, oklch(22% 0.05 248 / 0.55) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 60% at 50% 100%, oklch(8% 0.02 220 / 0.7) 0%, transparent 65%),
+    linear-gradient(
+      180deg,
+      oklch(11% 0.028 225 / 0.94) 0%,
+      oklch(7% 0.018 222 / 0.95) 55%,
+      oklch(5% 0.014 218 / 0.96) 100%
+    );
+}
+.cadence-sheet-night::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.55;
+  background-image:
+    radial-gradient(1px 1px at 8% 6%, rgba(244, 237, 224, 0.8), transparent 50%),
+    radial-gradient(1px 1px at 21% 17%, rgba(244, 237, 224, 0.55), transparent 50%),
+    radial-gradient(1.5px 1.5px at 37% 11%, rgba(244, 237, 224, 0.75), transparent 50%),
+    radial-gradient(1px 1px at 53% 8%, rgba(244, 237, 224, 0.5), transparent 50%),
+    radial-gradient(1px 1px at 71% 4%, rgba(244, 237, 224, 0.7), transparent 50%),
+    radial-gradient(1.5px 1.5px at 88% 18%, rgba(244, 237, 224, 0.85), transparent 50%),
+    radial-gradient(1px 1px at 14% 36%, rgba(244, 237, 224, 0.5), transparent 50%),
+    radial-gradient(1px 1px at 32% 28%, rgba(244, 237, 224, 0.6), transparent 50%),
+    radial-gradient(1.5px 1.5px at 64% 32%, rgba(244, 237, 224, 0.7), transparent 50%),
+    radial-gradient(1px 1px at 82% 44%, rgba(244, 237, 224, 0.55), transparent 50%),
+    radial-gradient(1px 1px at 12% 56%, rgba(244, 237, 224, 0.6), transparent 50%),
+    radial-gradient(1.5px 1.5px at 45% 60%, rgba(244, 237, 224, 0.6), transparent 50%),
+    radial-gradient(1px 1px at 76% 64%, rgba(244, 237, 224, 0.7), transparent 50%),
+    radial-gradient(1px 1px at 22% 78%, rgba(244, 237, 224, 0.5), transparent 50%),
+    radial-gradient(1.5px 1.5px at 58% 84%, rgba(244, 237, 224, 0.6), transparent 50%),
+    radial-gradient(1px 1px at 88% 91%, rgba(244, 237, 224, 0.55), transparent 50%),
+    radial-gradient(1px 1px at 38% 94%, rgba(244, 237, 224, 0.45), transparent 50%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dial-sun-halo,
   .dial-due-ping {

@@ -54,14 +54,14 @@
 <DialogPrimitive.Root {open} {onOpenChange}>
   <DialogPrimitive.Portal>
     <DialogPrimitive.Overlay
-      class="fixed inset-0 z-40 bg-[oklch(7%_0.02_220/0.62)] backdrop-blur-[2px] duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0"
+      class="fixed inset-0 z-40 bg-[oklch(7%_0.02_220/0.4)] duration-150 ease-out data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0"
     />
     <DialogPrimitive.Content
       class={cn(
-        "fixed z-50 flex flex-col overflow-hidden border border-rule-2 bg-[oklch(12%_0.02_220/0.96)] text-foam shadow-2xl ring-0 backdrop-blur-xl outline-none",
+        "cadence-sheet-night fixed z-50 flex flex-col overflow-hidden border border-rule-2 text-foam shadow-2xl ring-0 backdrop-blur-xl outline-none",
         "bottom-0 left-0 right-0 max-h-[88svh] rounded-t-3xl border-b-0",
         "md:bottom-0 md:top-0 md:right-0 md:left-auto md:h-svh md:max-h-none md:w-full md:max-w-[460px] md:rounded-none md:border-r-0",
-        "duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out",
+        "duration-200 ease-out data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom",
         "md:data-[state=open]:slide-in-from-right md:data-[state=closed]:slide-out-to-right",
       )}
