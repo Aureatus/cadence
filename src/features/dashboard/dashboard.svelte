@@ -23,7 +23,7 @@
     row.removeAttribute("data-dial-highlight");
     void row.offsetWidth;
     row.setAttribute("data-dial-highlight", "");
-    window.setTimeout(() => row.removeAttribute("data-dial-highlight"), 1000);
+    window.setTimeout(() => row.removeAttribute("data-dial-highlight"), 2700);
   }
 </script>
 
