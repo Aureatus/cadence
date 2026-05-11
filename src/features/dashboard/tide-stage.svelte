@@ -5,9 +5,10 @@
   type Props = {
     stats: DashboardStats;
     onSelectTodo?: (todoId: string) => void;
+    paused?: boolean;
   };
 
-  let { stats, onSelectTodo }: Props = $props();
+  let { stats, onSelectTodo, paused = false }: Props = $props();
 
   const nextTodo = $derived(stats.orderedTodos[0]);
   const kept = $derived(
@@ -31,7 +32,7 @@
     aria-label={`Average adherence score ${stats.score}`}
     class="relative mx-auto aspect-square w-full max-w-[353px] [&_svg]:size-full [&_svg]:overflow-visible md:max-w-[640px] xl:max-w-[640px] 2xl:max-w-[720px]"
   >
-    <DayDial todos={stats.orderedTodos} onSelect={onSelectTodo} />
+    <DayDial todos={stats.orderedTodos} onSelect={onSelectTodo} {paused} />
     <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1">
       <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-foam opacity-65">
         it is

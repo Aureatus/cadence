@@ -50,7 +50,11 @@
     Preparing your first cycle...
   </Card>
 {:else}
-  <TideStage {stats} onSelectTodo={openCadenceDetail} />
+  <TideStage
+    {stats}
+    onSelectTodo={openCadenceDetail}
+    paused={selectedTodoId !== null}
+  />
   <CurrentCycleWorkspace
     cycle={activeCycle}
     todos={stats.orderedTodos}

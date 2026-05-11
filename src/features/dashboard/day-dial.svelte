@@ -6,9 +6,10 @@
   type Props = {
     todos: Array<Todo>;
     onSelect?: (todoId: string) => void;
+    paused?: boolean;
   };
 
-  let { todos, onSelect }: Props = $props();
+  let { todos, onSelect, paused = false }: Props = $props();
 
   const marks = $derived(buildDialMarks(todos));
   const progress = $derived(dayProgress(new Date()));
@@ -19,6 +20,32 @@
   const ticks = Array.from({ length: 9 }, (_, index) => 6 + index * 2);
 
   let hoveredKey = $state<string | null>(null);
+
+  // When `paused` flips (e.g. the detail sheet opens or closes) we reset hover
+  // state and gate further updates briefly. Otherwise the browser synthesizes
+  // a mouseenter on whichever mark sits under the (stationary) cursor when the
+  // sheet's overlay disappears, latching the hover styling back on.
+  let suppressHoverUntil = 0;
+  let prevPaused = false;
+  $effect(() => {
+    if (paused === prevPaused) return;
+    if (paused) {
+      hoveredKey = null;
+    } else {
+      suppressHoverUntil = performance.now() + 300;
+    }
+    prevPaused = paused;
+  });
+
+  function setHover(key: string) {
+    if (paused) return;
+    if (performance.now() < suppressHoverUntil) return;
+    hoveredKey = key;
+  }
+
+  function clearHover(key: string) {
+    if (hoveredKey === key) hoveredKey = null;
+  }
 
   // Cursor proximity to the sun drives the orbital fan. We track at the window
   // level so the SVG element's own bounds don't matter — chasing a fanned mark
@@ -47,6 +74,12 @@
   }
 
   $effect(() => {
+    if (paused) {
+      sunHovered = false;
+      cancelCollapse();
+      return;
+    }
+
     function onMove(event: MouseEvent) {
       if (!svgEl) return;
       const rect = svgEl.getBoundingClientRect();
@@ -265,10 +298,10 @@
       role={interactive ? "button" : undefined}
       tabindex={interactive ? 0 : undefined}
       aria-label={mark.label}
-      onmouseenter={() => (hoveredKey = mark.key)}
-      onmouseleave={() => (hoveredKey = null)}
-      onfocus={() => (hoveredKey = mark.key)}
-      onblur={() => (hoveredKey = null)}
+      onmouseenter={() => setHover(mark.key)}
+      onmouseleave={() => clearHover(mark.key)}
+      onfocus={() => setHover(mark.key)}
+      onblur={() => clearHover(mark.key)}
       onclick={() => handleSelect(mark)}
       onkeydown={(event) => handleKeydown(event, mark)}
     >
