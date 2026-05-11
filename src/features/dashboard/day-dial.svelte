@@ -151,7 +151,12 @@
   }
 
   function handleSelect(mark: DialMark) {
-    if (mark.todoId && onSelect) onSelect(mark.todoId);
+    if (!mark.todoId || !onSelect) return;
+    // Clear hover state before opening the modal. Otherwise the overlay covers
+    // the mark without dispatching a mouseleave, so the hover styling
+    // (ring + tooltip chip) lingers when the modal is dismissed.
+    hoveredKey = null;
+    onSelect(mark.todoId);
   }
 
   function handleKeydown(event: KeyboardEvent, mark: DialMark) {
