@@ -38,6 +38,7 @@
 
 <article
   aria-label={`Todo: ${todo.title}`}
+  data-todo-id={todo.id}
   class={cn(
     "group/todo relative grid border-b border-rule transition-colors",
     "grid-cols-[40px_minmax(0,1fr)] grid-rows-[auto_auto_auto] items-start gap-x-3.5 gap-y-1.5 py-4",

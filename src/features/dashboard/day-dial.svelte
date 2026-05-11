@@ -1,8 +1,14 @@
 <script lang="ts">
   import type { Todo } from "@/db";
   import { arcPath, buildDialMarks, dayProgress, polar, type DialMark } from "@/lib/cadence";
+  import { cn } from "@/lib/utils";
 
-  let { todos }: { todos: Array<Todo> } = $props();
+  type Props = {
+    todos: Array<Todo>;
+    onSelect?: (todoId: string) => void;
+  };
+
+  let { todos, onSelect }: Props = $props();
 
   const marks = $derived(buildDialMarks(todos));
   const progress = $derived(dayProgress(new Date()));
@@ -12,6 +18,10 @@
 
   const ticks = Array.from({ length: 9 }, (_, index) => 6 + index * 2);
 
+  let hoveredKey = $state<string | null>(null);
+  const hoveredMark = $derived(marks.find((mark) => mark.key === hoveredKey) ?? null);
+  const hoveredPoint = $derived(hoveredMark ? polar(hoveredMark.progress, 355) : null);
+
   function tickPath(hour: number) {
     const tickProgress = (hour - 6) / 16.5;
     return {
@@ -20,9 +30,20 @@
       label: polar(tickProgress, 356),
     };
   }
+
+  function handleSelect(mark: DialMark) {
+    if (mark.todoId && onSelect) onSelect(mark.todoId);
+  }
+
+  function handleKeydown(event: KeyboardEvent, mark: DialMark) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleSelect(mark);
+    }
+  }
 </script>
 
-<svg viewBox="0 0 720 720" aria-hidden="true">
+<svg viewBox="0 0 720 720">
   <defs>
     <linearGradient id="seaArc" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#b8d8d3" stop-opacity="0.65" />
@@ -111,23 +132,39 @@
   />
   {#each marks as mark (mark.key)}
     {@const point = polar(mark.progress)}
-    {#if mark.state === "done"}
-      <g>
-        <circle cx={point.x} cy={point.y} r="9" fill="#f4ede0" stroke="#0a1f27" stroke-width="2" />
-        <circle cx={point.x} cy={point.y} r="4" fill="#0a1f27" />
-      </g>
-    {:else if mark.state === "due"}
-      <g filter="url(#glow)">
-        <circle cx={point.x} cy={point.y} r="16" fill="#e87b5a" />
-        <circle cx={point.x} cy={point.y} r="8" fill="#ffffff" />
-      </g>
-    {:else}
-      <circle cx={point.x} cy={point.y} r="7" fill="#b8d8d3" opacity="0.42" />
-    {/if}
+    {@const interactive = Boolean(mark.todoId)}
+    <g
+      class={cn("dial-mark", interactive && "focus-visible:outline-none")}
+      style={`--mx: ${point.x}px; --my: ${point.y}px;`}
+      data-hovered={hoveredKey === mark.key ? "true" : null}
+      data-interactive={interactive ? "true" : null}
+      role={interactive ? "button" : undefined}
+      tabindex={interactive ? 0 : undefined}
+      aria-label={mark.label}
+      onmouseenter={() => (hoveredKey = mark.key)}
+      onmouseleave={() => (hoveredKey = null)}
+      onfocus={() => (hoveredKey = mark.key)}
+      onblur={() => (hoveredKey = null)}
+      onclick={() => handleSelect(mark)}
+      onkeydown={(event) => handleKeydown(event, mark)}
+    >
+      {#if mark.state === "done"}
+        <circle cx="0" cy="0" r="9" fill="#f4ede0" stroke="#0a1f27" stroke-width="2" />
+        <circle cx="0" cy="0" r="4" fill="#0a1f27" />
+      {:else if mark.state === "due"}
+        <circle class="dial-due-ping" cx="0" cy="0" r="16" fill="#e87b5a" />
+        <g filter="url(#glow)">
+          <circle cx="0" cy="0" r="16" fill="#e87b5a" />
+          <circle cx="0" cy="0" r="8" fill="#ffffff" />
+        </g>
+      {:else}
+        <circle cx="0" cy="0" r="7" fill="#b8d8d3" opacity="0.42" />
+      {/if}
+    </g>
   {/each}
   <g transform={`translate(${nowPoint.x} ${nowPoint.y})`} filter="url(#glow)">
-    <circle r="36" fill="rgba(240,168,144,0.18)" />
-    <circle r="24" fill="rgba(240,168,144,0.30)" />
+    <circle class="dial-sun-halo" r="36" fill="rgba(240,168,144,0.18)" />
+    <circle class="dial-sun-halo --delay" r="24" fill="rgba(240,168,144,0.30)" />
     <circle r="14" fill="url(#sun)" />
   </g>
   <line
@@ -139,3 +176,17 @@
     stroke-dasharray="2 5"
   />
 </svg>
+
+{#if hoveredMark && hoveredPoint && hoveredMark.label}
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute z-10"
+    style={`left: ${(hoveredPoint.x / 720) * 100}%; top: ${(hoveredPoint.y / 720) * 100}%;`}
+  >
+    <div
+      class="-translate-x-1/2 -translate-y-1/2 rounded-full border border-rule-2 bg-[oklch(8%_0.02_220/0.92)] px-3 py-1.5 font-mono text-[10px] tracking-[0.1em] whitespace-nowrap text-moon-2 shadow-xl backdrop-blur-md"
+    >
+      {hoveredMark.label}
+    </div>
+  </div>
+{/if}

@@ -15,6 +15,16 @@
   $effect(() => {
     ensureActiveCycle(activeCycle);
   });
+
+  function focusTodoRow(todoId: string) {
+    const row = document.querySelector<HTMLElement>(`[data-todo-id="${todoId}"]`);
+    if (!row) return;
+    row.scrollIntoView({ behavior: "smooth", block: "center" });
+    row.removeAttribute("data-dial-highlight");
+    void row.offsetWidth;
+    row.setAttribute("data-dial-highlight", "");
+    window.setTimeout(() => row.removeAttribute("data-dial-highlight"), 1000);
+  }
 </script>
 
 {#if !activeCycle}
@@ -24,7 +34,7 @@
     Preparing your first cycle...
   </Card>
 {:else}
-  <TideStage {stats} />
+  <TideStage {stats} onSelectTodo={focusTodoRow} />
   <CurrentCycleWorkspace
     cycle={activeCycle}
     todos={stats.orderedTodos}

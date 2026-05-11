@@ -150,6 +150,8 @@
   --radius-4xl: calc(var(--radius) * 2.6);
   --animate-tide-pulse: tide-pulse 1.6s ease-out infinite;
   --animate-tide-bob: tide-bob 1.6s ease-in-out infinite;
+  --animate-dial-sun-breathe: dial-sun-breathe 5s ease-in-out infinite;
+  --animate-dial-due-ping: dial-due-ping 2.2s ease-out infinite;
   --breakpoint-3xl: 1920px;
 }
 
@@ -256,5 +258,85 @@
   }
   50% {
     transform: scaleY(1.25);
+  }
+}
+
+@keyframes dial-sun-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.62;
+  }
+}
+
+@keyframes dial-due-ping {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.dial-mark {
+  transform: translate(var(--mx), var(--my));
+  transform-origin: 0 0;
+  transition: transform 180ms ease-out;
+}
+.dial-mark[data-interactive="true"] {
+  cursor: pointer;
+}
+.dial-mark[data-hovered="true"] {
+  transform: translate(var(--mx), var(--my)) scale(1.22);
+}
+.dial-mark[data-interactive="true"]:focus {
+  outline: none;
+}
+.dial-mark[data-interactive="true"]:focus-visible > circle {
+  stroke: var(--color-coral);
+  stroke-width: 1.5;
+}
+
+.dial-sun-halo {
+  transform-origin: 0 0;
+  animation: var(--animate-dial-sun-breathe);
+}
+.dial-sun-halo.--delay {
+  animation-delay: 1.6s;
+}
+
+.dial-due-ping {
+  transform-origin: 0 0;
+  animation: var(--animate-dial-due-ping);
+}
+
+article[data-dial-highlight] {
+  animation: dial-todo-highlight 0.9s ease-out;
+}
+@keyframes dial-todo-highlight {
+  0% {
+    box-shadow: 0 0 0 0 oklch(60% 0.14 35 / 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 18px oklch(60% 0.14 35 / 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dial-sun-halo,
+  .dial-due-ping {
+    animation: none;
+  }
+  .dial-mark {
+    transition: none;
+  }
+  article[data-dial-highlight] {
+    animation: none;
   }
 }

@@ -196,15 +196,20 @@ export type DialMark = {
   key: string;
   progress: number;
   state: "done" | "due" | "window";
+  todoId?: string;
+  label?: string;
 };
 
 export function buildDialMarks(todos: Array<Todo>): Array<DialMark> {
   const marks = todos.flatMap<DialMark>((todo) => {
     const due = getDueState(todo);
+    const presentation = getTodoPresentation(due, todo);
     const completions: Array<DialMark> = todo.completionLog.slice(-3).map((completion, index) => ({
       key: `${todo.id}-done-${index}`,
       progress: dayProgress(new Date(completion.completedAt)),
-      state: "done",
+      state: "done" as const,
+      todoId: todo.id,
+      label: `${todo.title} · logged ${formatClock(new Date(completion.completedAt))}`,
     }));
 
     return [
@@ -213,6 +218,8 @@ export function buildDialMarks(todos: Array<Todo>): Array<DialMark> {
         key: `${todo.id}-due`,
         progress: dayProgress(due.dueAt),
         state: due.isDue ? "due" : "window",
+        todoId: todo.id,
+        label: `${todo.title} · ${presentation.impact}`,
       },
     ];
   });
@@ -222,6 +229,6 @@ export function buildDialMarks(todos: Array<Todo>): Array<DialMark> {
   return [0.18, 0.34, 0.52, 0.68, 0.86].map((progress, index) => ({
     key: `placeholder-${index}`,
     progress,
-    state: "window",
+    state: "window" as const,
   }));
 }
