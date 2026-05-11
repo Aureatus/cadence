@@ -9,6 +9,7 @@
 
   let path = $state(readPath());
   let HistoryPage = $state<Component | null>(null);
+  let CadencesPage = $state<Component | null>(null);
 
   $effect(() => {
     function update() {
@@ -24,12 +25,22 @@
         HistoryPage = m.default;
       });
     }
+    if (path.startsWith("/cadences") && !CadencesPage) {
+      void import("@/features/cadences/cadences-page.svelte").then((m) => {
+        CadencesPage = m.default;
+      });
+    }
   });
 </script>
 
 {#if path.startsWith("/history")}
   {#if HistoryPage}
     {@const View = HistoryPage}
+    <View />
+  {/if}
+{:else if path.startsWith("/cadences")}
+  {#if CadencesPage}
+    {@const View = CadencesPage}
     <View />
   {/if}
 {:else}

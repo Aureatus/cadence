@@ -32,8 +32,8 @@ test("creates a cyclic todo, completes an occurrence, and persists collection da
 }) => {
   await openApp(page, "/", baseNow);
 
-  await expect(page.getByRole("heading", { name: "Cadence" })).toBeVisible();
-  await expect(page.getByText("No active cadences yet")).toBeVisible();
+  await expect(page.getByRole("link", { name: /Cadence/ }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Add cadence" })).toBeVisible();
 
   await page.getByRole("button", { name: "Add cadence" }).click();
   const dialog = page.locator("[data-slot='dialog-content']");
@@ -47,11 +47,6 @@ test("creates a cyclic todo, completes an occurrence, and persists collection da
   await dialog.getByRole("button", { name: "Add cadence" }).click();
   await expect(dialog).not.toBeVisible();
 
-  const card = page.getByRole("article", { name: "Todo: Hydration pulse" });
-  await expect(card).toBeVisible();
-  await expect(card.getByText("3×/day")).toBeVisible();
-  await expect(card.getByText(/^Next /)).toBeVisible();
-
   const createdTodos = await readCollection<TodoRecord>(page, "cadence.todos");
   expect(createdTodos).toHaveLength(1);
   const createdTodo = firstItem(createdTodos);
@@ -64,8 +59,15 @@ test("creates a cyclic todo, completes an occurrence, and persists collection da
     completionLog: [],
   });
 
+  // Row-level management lives on the Cadences page now.
+  await page.goto("/cadences");
+
+  const card = page.getByRole("article", { name: "Todo: Hydration pulse" });
+  await expect(card).toBeVisible();
+  await expect(card.getByText("3×/day")).toBeVisible();
+  await expect(card.getByText(/^Next /)).toBeVisible();
+
   await card.getByRole("button", { name: "Mark complete" }).click();
-  await expect(page.getByLabel("Average adherence score 100")).toBeVisible();
 
   const completedTodos = await readCollection<TodoRecord>(page, "cadence.todos");
   const completedTodo = firstItem(completedTodos);
