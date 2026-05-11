@@ -327,8 +327,7 @@
 .cadence-sheet-night {
   isolation: isolate;
   background:
-    linear-gradient(180deg, oklch(72% 0.16 35 / 0.4) 0%, transparent 80px),
-    radial-gradient(ellipse 90% 45% at 50% 0%, oklch(22% 0.05 248 / 0.4) 0%, transparent 70%),
+    radial-gradient(ellipse 90% 45% at 50% 0%, oklch(22% 0.05 248 / 0.5) 0%, transparent 70%),
     radial-gradient(ellipse 80% 60% at 50% 100%, oklch(8% 0.02 220 / 0.45) 0%, transparent 65%),
     linear-gradient(
       180deg,

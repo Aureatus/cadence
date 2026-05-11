@@ -145,13 +145,13 @@
             {/if}
           </div>
 
-          <div class="flex md:justify-end">
+          <div class="flex justify-center">
             <Button
               type="button"
               variant={buttonVariant}
               size="pill"
               onclick={logNow}
-              class="w-full justify-center py-3 text-sm tracking-[0.18em] md:w-auto md:min-w-[200px]"
+              class="w-full justify-center py-3 text-sm tracking-[0.18em] text-deep md:w-auto md:min-w-[220px]"
             >
               {presentation.action} now
             </Button>
