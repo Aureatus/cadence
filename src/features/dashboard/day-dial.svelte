@@ -39,31 +39,60 @@
     cursorDist = Number.POSITIVE_INFINITY;
   }
 
-  // Marks within a small radius of the sun get pushed outward so the halo
-  // doesn't eclipse them — both visually and for hit testing. The lift falls
-  // off linearly so a mark drifting past the sun glides smoothly in and out.
-  // When the cursor enters the sun's neighbourhood, the cluster fans into a
-  // small orbit around the sun so individual marks are reachable even when
-  // their times coincide.
-  function displacedPoint(markProgress: number) {
-    const base = polar(markProgress, 285);
-    const dx = base.x - nowPoint.x;
-    const dy = base.y - nowPoint.y;
-    const distance = Math.hypot(dx, dy);
+  // When the cursor enters the sun's neighbourhood, all marks within the
+  // cluster threshold are placed on a 72-unit orbit around the sun, evenly
+  // spaced across a 180° arc on the side facing away from the dial centre.
+  // This guarantees no two clustered marks share a position — even when their
+  // progress values coincide — and keeps the fan pointing outward, away from
+  // the clock/streak content in the middle of the dial.
+  const FAN_RADIUS = 72;
+  const CLUSTER_THRESHOLD = 72;
 
-    if (sunHovered && distance < 72) {
-      const fanRadius = 72;
-      const angle = distance > 0.5 ? Math.atan2(dy, dx) : Math.PI / 2;
-      return {
-        x: nowPoint.x + Math.cos(angle) * fanRadius,
-        y: nowPoint.y + Math.sin(angle) * fanRadius,
-      };
-    }
+  const clusteredFan = $derived.by(() => {
+    const result = new Map<string, { x: number; y: number }>();
+    if (!sunHovered) return result;
 
+    const inCluster = marks
+      .map((mark) => {
+        const base = polar(mark.progress, 285);
+        return {
+          mark,
+          distance: Math.hypot(base.x - nowPoint.x, base.y - nowPoint.y),
+        };
+      })
+      .filter(({ distance }) => distance < CLUSTER_THRESHOLD)
+      .sort((a, b) => a.mark.progress - b.mark.progress);
+
+    if (inCluster.length === 0) return result;
+
+    const anchorAngle = Math.atan2(nowPoint.y - 360, nowPoint.x - 360);
+    const angleStep = Math.PI / inCluster.length;
+    const startOffset = (-(inCluster.length - 1) / 2) * angleStep;
+
+    inCluster.forEach(({ mark }, index) => {
+      const angle = anchorAngle + startOffset + index * angleStep;
+      result.set(mark.key, {
+        x: nowPoint.x + Math.cos(angle) * FAN_RADIUS,
+        y: nowPoint.y + Math.sin(angle) * FAN_RADIUS,
+      });
+    });
+
+    return result;
+  });
+
+  // Marks outside the fan zone but still within the sun's halo get a quiet
+  // radial lift, so a mark drifting past the sun glides smoothly in and out
+  // instead of being eclipsed.
+  function displacedPoint(mark: DialMark) {
+    const fanned = clusteredFan.get(mark.key);
+    if (fanned) return fanned;
+
+    const base = polar(mark.progress, 285);
+    const distance = Math.hypot(base.x - nowPoint.x, base.y - nowPoint.y);
     const threshold = 52;
     if (distance >= threshold) return base;
     const closeness = 1 - distance / threshold;
-    return polar(markProgress, 285 + closeness * 30);
+    return polar(mark.progress, 285 + closeness * 30);
   }
 
   function tickPath(hour: number) {
@@ -175,7 +204,7 @@
     stroke-linecap="round"
   />
   {#each marks as mark (mark.key)}
-    {@const point = displacedPoint(mark.progress)}
+    {@const point = displacedPoint(mark)}
     {@const interactive = Boolean(mark.todoId)}
     <g
       class={cn("dial-mark", interactive && "focus-visible:outline-none")}
