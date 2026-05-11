@@ -22,9 +22,29 @@
   const hoveredMark = $derived(marks.find((mark) => mark.key === hoveredKey) ?? null);
   const hoveredPoint = $derived(hoveredMark ? polar(hoveredMark.progress, 355) : null);
 
-  // Cursor distance from the sun (in SVG userspace) drives the orbital fan.
-  let cursorDist = $state(Number.POSITIVE_INFINITY);
-  const sunHovered = $derived(cursorDist < 90);
+  // Cursor proximity to the sun drives the orbital fan. A wider activation
+  // radius plus a short grace period before collapse gives plenty of cursor
+  // headroom — quick excursions off a fanned mark don't immediately recollapse
+  // the cluster.
+  const SUN_HOVER_RADIUS = 130;
+  const COLLAPSE_GRACE_MS = 220;
+  let sunHovered = $state(false);
+  let collapseTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function cancelCollapse() {
+    if (collapseTimer !== null) {
+      clearTimeout(collapseTimer);
+      collapseTimer = null;
+    }
+  }
+
+  function scheduleCollapse() {
+    if (collapseTimer !== null) return;
+    collapseTimer = setTimeout(() => {
+      sunHovered = false;
+      collapseTimer = null;
+    }, COLLAPSE_GRACE_MS);
+  }
 
   function updateCursor(event: MouseEvent) {
     const svg = event.currentTarget as SVGSVGElement;
@@ -32,12 +52,21 @@
     if (rect.width === 0 || rect.height === 0) return;
     const x = ((event.clientX - rect.left) / rect.width) * 720;
     const y = ((event.clientY - rect.top) / rect.height) * 720;
-    cursorDist = Math.hypot(x - nowPoint.x, y - nowPoint.y);
+    const distance = Math.hypot(x - nowPoint.x, y - nowPoint.y);
+
+    if (distance < SUN_HOVER_RADIUS) {
+      cancelCollapse();
+      sunHovered = true;
+    } else if (sunHovered) {
+      scheduleCollapse();
+    }
   }
 
   function clearCursor() {
-    cursorDist = Number.POSITIVE_INFINITY;
+    if (sunHovered) scheduleCollapse();
   }
+
+  $effect(() => () => cancelCollapse());
 
   // When the cursor enters the sun's neighbourhood, all marks within the
   // cluster threshold are placed on a 72-unit orbit around the sun, evenly
