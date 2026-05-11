@@ -1,73 +1,70 @@
-# React + TypeScript + Vite
+# Cadence
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A local-first PWA for tracking recurring tasks by cadence, timing window, and adherence score. Built with Astro SSG + Svelte 5, deployed to Cloudflare Workers via Alchemy IaC.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Astro 6** static output (`output: "static"`, `inlineStylesheets: "always"`)
+- **Svelte 5** with runes (`$state`, `$derived`, `$effect`)
+- **Tailwind v4** + **bits-ui** (shadcn-style headless primitives)
+- **Geist** sans (no italic file — browser-synthesized obliques)
+- **@tanstack/svelte-db** with a localStorage collection adapter
+- **valibot** schemas (Standard Schema spec)
+- **@vite-pwa/astro** for service worker + manifest, **@kindspells/astro-shield** for SRI
+- **Bun** runtime + package manager (`bun@1.3.5`)
+- **Cloudflare Workers Static Assets** via **Alchemy** (`alchemy.run.ts`)
 
-## React Compiler
+## Scripts
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Command                  | What it does                                                     |
+| ------------------------ | ---------------------------------------------------------------- |
+| `bun dev`                | Astro dev server via `portless` on a stable hostname             |
+| `bun run build`          | `astro check && astro build`                                     |
+| `bun run preview`        | Serve the built `dist/`                                          |
+| `bun run test`           | `bun:test` units for `time.ts` + `cadence.ts` math (TZ=UTC)      |
+| `bun run test:e2e`       | Playwright smoke test (create → complete → persist)              |
+| `bun run check`          | format-check, lint, knip, jscpd, fallow dead-code/dupes + health |
+| `bun run analyze`        | Build with `rollup-plugin-visualizer` → `.analyze/bundle.html`   |
+| `bun run deploy`         | `astro build && alchemy deploy` (Cloudflare)                     |
+| `bun run deploy:destroy` | Tear down the Alchemy stack                                      |
+| `bun run pwa:assets`     | Regenerate PWA icons from `pwa-source.svg`                       |
 
-## Expanding the ESLint configuration
+## Layout
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```
+src/
+  pages/              Astro entry points (index, history)
+  layouts/            Shared shell
+  components/
+    ui/               bits-ui-based primitives (button, dialog, input, …)
+    layout/           App chrome
+  features/           Page-level feature components
+  lib/
+    cadence.ts        Presentation helpers (impact, tone, formatting)
+    filter.ts         Status / due filters
+    utils.ts          cn(), small helpers
+  db.ts               TanStack DB collections + valibot schemas
+  time.ts             Cadence math (due state, lateness, scoring, streaks)
+  test-fixtures/      Shared test data
+e2e/                  Playwright suite (one smoke test)
+alchemy.run.ts        Cloudflare deploy stack
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Testing
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+26 unit tests (`bun:test`, vitest-compatible API) cover the math: due-state computation, overnight windows, lateness scoring, streak rollups, formatters. `--conditions svelte` is required so Bun resolves the `svelte` export condition for `@tanstack/svelte-db`.
 
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
+One Playwright test exercises the full DOM path: open app → create cadence → mark complete → assert the completion is persisted to localStorage. Anything tighter than that lives in unit tests.
+
+## CI / CD
+
+`.github/workflows/deploy.yml` runs on every push and PR:
+
+1. **test** job — `bun run check` → `bun run test` → install chromium → `bun run test:e2e`
+2. **deploy** job — gated on `needs: test` and `push` to `main`. Runs `bun run build` then `bun alchemy deploy`.
+
+Required secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `ALCHEMY_STATE_TOKEN`.
+
+## Local-first data
+
+State lives entirely in `localStorage` (no backend). The TanStack DB collections in `src/db.ts` serialize each entry under a versioned key so optimistic updates from the UI don't tear. Wiping site data resets the app.
