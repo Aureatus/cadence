@@ -287,20 +287,28 @@
 .dial-mark {
   transform: translate(var(--mx), var(--my));
   transform-origin: 0 0;
-  transition: transform 180ms ease-out;
+  transition:
+    transform 180ms ease-out,
+    filter 180ms ease-out;
 }
 .dial-mark[data-interactive="true"] {
   cursor: pointer;
 }
 .dial-mark[data-hovered="true"] {
-  transform: translate(var(--mx), var(--my)) scale(1.22);
+  transform: translate(var(--mx), var(--my)) scale(1.4);
+  filter: drop-shadow(0 0 8px oklch(72% 0.16 35 / 0.7));
 }
 .dial-mark[data-interactive="true"]:focus {
   outline: none;
 }
-.dial-mark[data-interactive="true"]:focus-visible > circle {
-  stroke: var(--color-coral);
-  stroke-width: 1.5;
+.dial-mark-ring {
+  opacity: 0;
+  transition: opacity 160ms ease-out;
+  pointer-events: none;
+}
+.dial-mark[data-hovered="true"] .dial-mark-ring,
+.dial-mark[data-interactive="true"]:focus-visible .dial-mark-ring {
+  opacity: 1;
 }
 
 .dial-sun-halo {

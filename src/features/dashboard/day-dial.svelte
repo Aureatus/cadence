@@ -19,8 +19,6 @@
   const ticks = Array.from({ length: 9 }, (_, index) => 6 + index * 2);
 
   let hoveredKey = $state<string | null>(null);
-  const hoveredMark = $derived(marks.find((mark) => mark.key === hoveredKey) ?? null);
-  const hoveredPoint = $derived(hoveredMark ? polar(hoveredMark.progress, 355) : null);
 
   // Cursor proximity to the sun drives the orbital fan. We track at the window
   // level so the SVG element's own bounds don't matter — chasing a fanned mark
@@ -127,6 +125,21 @@
     const closeness = 1 - distance / threshold;
     return polar(mark.progress, 285 + closeness * 30);
   }
+
+  const hoveredMark = $derived(marks.find((mark) => mark.key === hoveredKey) ?? null);
+  const hoveredPoint = $derived.by(() => {
+    if (!hoveredMark) return null;
+    const markPos = displacedPoint(hoveredMark);
+    const dx = markPos.x - 360;
+    const dy = markPos.y - 360;
+    const magnitude = Math.hypot(dx, dy);
+    if (magnitude === 0) return markPos;
+    const pushOut = 44;
+    return {
+      x: markPos.x + (dx / magnitude) * pushOut,
+      y: markPos.y + (dy / magnitude) * pushOut,
+    };
+  });
 
   function tickPath(hour: number) {
     const tickProgress = (hour - 6) / 16.5;
@@ -254,6 +267,15 @@
       onclick={() => handleSelect(mark)}
       onkeydown={(event) => handleKeydown(event, mark)}
     >
+      <circle
+        class="dial-mark-ring"
+        cx="0"
+        cy="0"
+        r="22"
+        fill="none"
+        stroke="#f0a890"
+        stroke-width="2"
+      />
       {#if mark.state === "done"}
         <circle cx="0" cy="0" r="9" fill="#f4ede0" stroke="#0a1f27" stroke-width="2" />
         <circle cx="0" cy="0" r="4" fill="#0a1f27" />
