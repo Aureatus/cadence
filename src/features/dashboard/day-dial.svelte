@@ -22,13 +22,15 @@
   const hoveredMark = $derived(marks.find((mark) => mark.key === hoveredKey) ?? null);
   const hoveredPoint = $derived(hoveredMark ? polar(hoveredMark.progress, 355) : null);
 
-  // Cursor proximity to the sun drives the orbital fan. A wider activation
-  // radius plus a short grace period before collapse gives plenty of cursor
-  // headroom — quick excursions off a fanned mark don't immediately recollapse
-  // the cluster.
-  const SUN_HOVER_RADIUS = 130;
-  const COLLAPSE_GRACE_MS = 220;
+  // Cursor proximity to the sun drives the orbital fan. We track at the window
+  // level so the SVG element's own bounds don't matter — chasing a fanned mark
+  // past the dial edge no longer trips a collapse. A wide activation radius
+  // plus a long grace timer give plenty of headroom for slow approach and
+  // click micro-adjustments on small targets.
+  const SUN_HOVER_RADIUS = 180;
+  const COLLAPSE_GRACE_MS = 400;
   let sunHovered = $state(false);
+  let svgEl: SVGSVGElement | undefined = $state();
   let collapseTimer: ReturnType<typeof setTimeout> | null = null;
 
   function cancelCollapse() {
@@ -46,27 +48,29 @@
     }, COLLAPSE_GRACE_MS);
   }
 
-  function updateCursor(event: MouseEvent) {
-    const svg = event.currentTarget as SVGSVGElement;
-    const rect = svg.getBoundingClientRect();
-    if (rect.width === 0 || rect.height === 0) return;
-    const x = ((event.clientX - rect.left) / rect.width) * 720;
-    const y = ((event.clientY - rect.top) / rect.height) * 720;
-    const distance = Math.hypot(x - nowPoint.x, y - nowPoint.y);
+  $effect(() => {
+    function onMove(event: MouseEvent) {
+      if (!svgEl) return;
+      const rect = svgEl.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      const x = ((event.clientX - rect.left) / rect.width) * 720;
+      const y = ((event.clientY - rect.top) / rect.height) * 720;
+      const distance = Math.hypot(x - nowPoint.x, y - nowPoint.y);
 
-    if (distance < SUN_HOVER_RADIUS) {
-      cancelCollapse();
-      sunHovered = true;
-    } else if (sunHovered) {
-      scheduleCollapse();
+      if (distance < SUN_HOVER_RADIUS) {
+        cancelCollapse();
+        sunHovered = true;
+      } else if (sunHovered) {
+        scheduleCollapse();
+      }
     }
-  }
 
-  function clearCursor() {
-    if (sunHovered) scheduleCollapse();
-  }
-
-  $effect(() => () => cancelCollapse());
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      cancelCollapse();
+    };
+  });
 
   // When the cursor enters the sun's neighbourhood, all marks within the
   // cluster threshold are placed on a 72-unit orbit around the sun, evenly
@@ -145,7 +149,7 @@
   }
 </script>
 
-<svg viewBox="0 0 720 720" onmousemove={updateCursor} onmouseleave={clearCursor}>
+<svg bind:this={svgEl} viewBox="0 0 720 720">
   <defs>
     <linearGradient id="seaArc" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#b8d8d3" stop-opacity="0.65" />
