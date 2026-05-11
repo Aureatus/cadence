@@ -4,7 +4,7 @@ const isActive = (linkPath: string, exact = false) =>
   exact ? path === linkPath : path === linkPath || path.startsWith(`${linkPath}/`);
 
 const navLinks = [
-  { to: "/", label: "Today", num: "i", exact: true },
+  { to: "/", label: "Tide", num: "i", exact: true },
   { to: "/cadences", label: "Cadences", num: "ii", exact: false },
   { to: "/history", label: "History", num: "iii", exact: false },
 ] as const;
