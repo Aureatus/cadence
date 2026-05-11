@@ -11,6 +11,6 @@ import DevSeedButton from "@/features/dashboard/dev-seed-button.svelte";
   >
     <Header />
     <AppRoot client:only="svelte" />
-    {import.meta.env.DEV && <DevSeedButton client:only="svelte" />}
+    <DevSeedButton client:only="svelte" />
   </main>
 </BaseLayout>

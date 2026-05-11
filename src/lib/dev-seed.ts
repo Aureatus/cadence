@@ -26,7 +26,6 @@ type SeedTodoInput = {
 };
 
 export function runDevSeed(activeCycle: Cycle) {
-  if (!import.meta.env.DEV) return;
   if (isSeedingDevCadences) return;
   isSeedingDevCadences = true;
 
