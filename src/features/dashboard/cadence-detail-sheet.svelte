@@ -49,6 +49,29 @@
   function logNow() {
     if (displayed) markTodoComplete(displayed);
   }
+
+  // Seeded RNG so the starfield is consistent across sessions.
+  function makeRng(seed: number) {
+    let state = seed >>> 0;
+    return () => {
+      state = (state + 0x6d2b79f5) | 0;
+      let t = Math.imul(state ^ (state >>> 15), 1 | state);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function buildShadow(count: number, rng: () => number) {
+    const parts: Array<string> = [];
+    for (let i = 0; i < count; i++) {
+      parts.push(`${Math.floor(rng() * 2000)}px ${Math.floor(rng() * 2000)}px #FFF`);
+    }
+    return parts.join(",");
+  }
+  const rng = makeRng(420);
+  const shadowSmall = buildShadow(700, rng);
+  const shadowMedium = buildShadow(200, rng);
+  const shadowBig = buildShadow(100, rng);
+  const starStyle = `--cadence-stars-small: ${shadowSmall}; --cadence-stars-medium: ${shadowMedium}; --cadence-stars-big: ${shadowBig};`;
 </script>
 
 <DialogPrimitive.Root {open} {onOpenChange}>
@@ -61,11 +84,16 @@
         "cadence-sheet-night fixed z-50 flex flex-col overflow-hidden border border-rule-2 text-foam shadow-2xl ring-0 backdrop-blur-xl outline-none",
         "bottom-0 left-0 right-0 max-h-[88svh] rounded-t-3xl border-b-0",
         "md:bottom-0 md:top-0 md:right-0 md:left-auto md:h-svh md:max-h-none md:w-full md:max-w-[460px] md:rounded-none md:border-r-0",
-        "duration-200 ease-out data-[state=open]:animate-in data-[state=closed]:animate-out",
-        "data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom",
-        "md:data-[state=open]:slide-in-from-right md:data-[state=closed]:slide-out-to-right",
+        "duration-300 ease-out data-[state=open]:animate-in data-[state=closed]:animate-out",
+        "data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
+        "data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
       )}
     >
+      <div aria-hidden="true" class="cadence-stars" style={starStyle}>
+        <div class="cadence-stars-layer cadence-stars-layer-small"></div>
+        <div class="cadence-stars-layer cadence-stars-layer-medium"></div>
+        <div class="cadence-stars-layer cadence-stars-layer-big"></div>
+      </div>
       {#if displayed && due && presentation}
         <DialogPrimitive.Title class="sr-only">{displayed.title}</DialogPrimitive.Title>
         <DialogPrimitive.Description class="sr-only">
