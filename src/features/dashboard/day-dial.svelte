@@ -22,12 +22,44 @@
   const hoveredMark = $derived(marks.find((mark) => mark.key === hoveredKey) ?? null);
   const hoveredPoint = $derived(hoveredMark ? polar(hoveredMark.progress, 355) : null);
 
+  // Cursor distance from the sun (in SVG userspace) drives the orbital fan.
+  let cursorDist = $state(Number.POSITIVE_INFINITY);
+  const sunHovered = $derived(cursorDist < 90);
+
+  function updateCursor(event: MouseEvent) {
+    const svg = event.currentTarget as SVGSVGElement;
+    const rect = svg.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    const x = ((event.clientX - rect.left) / rect.width) * 720;
+    const y = ((event.clientY - rect.top) / rect.height) * 720;
+    cursorDist = Math.hypot(x - nowPoint.x, y - nowPoint.y);
+  }
+
+  function clearCursor() {
+    cursorDist = Number.POSITIVE_INFINITY;
+  }
+
   // Marks within a small radius of the sun get pushed outward so the halo
   // doesn't eclipse them — both visually and for hit testing. The lift falls
   // off linearly so a mark drifting past the sun glides smoothly in and out.
+  // When the cursor enters the sun's neighbourhood, the cluster fans into a
+  // small orbit around the sun so individual marks are reachable even when
+  // their times coincide.
   function displacedPoint(markProgress: number) {
     const base = polar(markProgress, 285);
-    const distance = Math.hypot(base.x - nowPoint.x, base.y - nowPoint.y);
+    const dx = base.x - nowPoint.x;
+    const dy = base.y - nowPoint.y;
+    const distance = Math.hypot(dx, dy);
+
+    if (sunHovered && distance < 72) {
+      const fanRadius = 72;
+      const angle = distance > 0.5 ? Math.atan2(dy, dx) : Math.PI / 2;
+      return {
+        x: nowPoint.x + Math.cos(angle) * fanRadius,
+        y: nowPoint.y + Math.sin(angle) * fanRadius,
+      };
+    }
+
     const threshold = 52;
     if (distance >= threshold) return base;
     const closeness = 1 - distance / threshold;
@@ -55,7 +87,7 @@
   }
 </script>
 
-<svg viewBox="0 0 720 720">
+<svg viewBox="0 0 720 720" onmousemove={updateCursor} onmouseleave={clearCursor}>
   <defs>
     <linearGradient id="seaArc" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#b8d8d3" stop-opacity="0.65" />
