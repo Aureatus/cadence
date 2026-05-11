@@ -21,11 +21,13 @@
   let { todo, open, onOpenChange }: Props = $props();
 
   // Hold the last todo briefly during close-out so the content doesn't blank
-  // during the slide-out animation.
-  let displayed = $state<Todo | null>(todo);
+  // during the slide-out animation. `stashed` tracks the most recent non-null
+  // todo; `displayed` falls back to it when the prop drops to null.
+  let stashed = $state<Todo | null>(null);
   $effect(() => {
-    if (todo) displayed = todo;
+    if (todo) stashed = todo;
   });
+  const displayed = $derived<Todo | null>(todo ?? stashed);
 
   const due = $derived(displayed ? getDueState(displayed) : null);
   const presentation = $derived(due && displayed ? getTodoPresentation(due, displayed) : null);

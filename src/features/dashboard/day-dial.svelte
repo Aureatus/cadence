@@ -290,6 +290,7 @@
   {#each marks as mark (mark.key)}
     {@const point = displacedPoint(mark)}
     {@const interactive = Boolean(mark.todoId)}
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <g
       class={cn("dial-mark", interactive && "focus-visible:outline-none")}
       style={`--mx: ${point.x}px; --my: ${point.y}px;`}

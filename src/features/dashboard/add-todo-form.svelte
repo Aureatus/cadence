@@ -157,6 +157,10 @@
     };
   }
 
+  // The form intentionally seeds itself from `editing` exactly once on mount.
+  // Parent dialogs unmount + remount the form when the edited todo changes,
+  // so we don't want to thread `editing` through reactive state.
+  // svelte-ignore state_referenced_locally
   const initial = editing
     ? todoToInitialState(editing)
     : {
