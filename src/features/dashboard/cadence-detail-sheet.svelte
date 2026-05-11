@@ -119,7 +119,7 @@
               {/if}
               {presentation.impact}
             </span>
-            <span class="font-mono text-[10px] tracking-[0.22em] text-foam/55 uppercase">
+            <span class="font-mono text-[10px] tracking-[0.22em] text-foam/70 uppercase">
               {displayed.frequencyPerDay}× per day · next {formatWhen(due.dueAt)}
             </span>
           </div>
@@ -158,8 +158,8 @@
           </div>
 
           <div class="grid grid-cols-2 gap-4">
-            <div class="rounded-2xl border border-rule bg-[oklch(15%_0.02_220/0.45)] px-4 py-3">
-              <div class="font-mono text-[10px] tracking-[0.22em] text-foam/55 uppercase">
+            <div class="rounded-2xl border border-rule-2 bg-[oklch(15%_0.02_220/0.75)] px-4 py-3 shadow-[inset_0_1px_0_oklch(100%_0_0/0.04)]">
+              <div class="font-mono text-[10px] tracking-[0.22em] text-foam/70 uppercase">
                 Adherence
               </div>
               <div
@@ -167,12 +167,12 @@
               >
                 {due.adherenceScore}%
               </div>
-              <div class="mt-1 font-mono text-[10px] tracking-[0.16em] text-foam/55 uppercase">
+              <div class="mt-1 font-mono text-[10px] tracking-[0.16em] text-foam/70 uppercase">
                 if logged now
               </div>
             </div>
-            <div class="rounded-2xl border border-rule bg-[oklch(15%_0.02_220/0.45)] px-4 py-3">
-              <div class="font-mono text-[10px] tracking-[0.22em] text-foam/55 uppercase">
+            <div class="rounded-2xl border border-rule-2 bg-[oklch(15%_0.02_220/0.75)] px-4 py-3 shadow-[inset_0_1px_0_oklch(100%_0_0/0.04)]">
+              <div class="font-mono text-[10px] tracking-[0.22em] text-foam/70 uppercase">
                 Logged
               </div>
               <div
@@ -180,38 +180,38 @@
               >
                 {displayed.completionLog.length}
               </div>
-              <div class="mt-1 font-mono text-[10px] tracking-[0.16em] text-foam/55 uppercase">
+              <div class="mt-1 font-mono text-[10px] tracking-[0.16em] text-foam/70 uppercase">
                 all-time
               </div>
             </div>
           </div>
 
           <section class="flex flex-col gap-2">
-            <h3 class="font-mono text-[10px] tracking-[0.24em] text-foam/55 uppercase">Schedule</h3>
+            <h3 class="font-mono text-[10px] tracking-[0.24em] text-foam/70 uppercase">Schedule</h3>
             <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13px]">
-              <dt class="font-mono text-[10px] tracking-[0.18em] text-foam/55 uppercase">Window</dt>
+              <dt class="font-mono text-[10px] tracking-[0.18em] text-foam/70 uppercase">Window</dt>
               <dd class="font-display tracking-[0.005em] tabular-nums text-moon-2">
                 {displayed.windowStart} – {displayed.windowEnd}
               </dd>
-              <dt class="font-mono text-[10px] tracking-[0.18em] text-foam/55 uppercase">Grace</dt>
+              <dt class="font-mono text-[10px] tracking-[0.18em] text-foam/70 uppercase">Grace</dt>
               <dd class="font-display tracking-[0.005em] tabular-nums text-moon-2">
                 {displayed.graceMinutes} min
               </dd>
-              <dt class="font-mono text-[10px] tracking-[0.18em] text-foam/55 uppercase">
+              <dt class="font-mono text-[10px] tracking-[0.18em] text-foam/70 uppercase">
                 Min gap
               </dt>
               <dd class="font-display tracking-[0.005em] tabular-nums text-moon-2">
                 {formatGapMinutes(displayed.minSpacingHours * 60)}
               </dd>
-              <dt class="font-mono text-[10px] tracking-[0.18em] text-foam/55 uppercase">Days</dt>
+              <dt class="font-mono text-[10px] tracking-[0.18em] text-foam/70 uppercase">Days</dt>
               <dd class="font-display tracking-[0.005em] text-moon-2">{daysLabel}</dd>
             </dl>
           </section>
 
           <section class="flex flex-col gap-2">
-            <h3 class="font-mono text-[10px] tracking-[0.24em] text-foam/55 uppercase">Recent</h3>
+            <h3 class="font-mono text-[10px] tracking-[0.24em] text-foam/70 uppercase">Recent</h3>
             {#if recent.length === 0}
-              <p class="font-display text-[13px] text-foam/55">No logs yet.</p>
+              <p class="font-display text-[13px] text-foam/70">No logs yet.</p>
             {:else}
               <ul class="flex flex-col">
                 {#each recent as completion (completion.completedAt)}
@@ -226,7 +226,7 @@
                     <span
                       class={cn(
                         "font-mono text-[10px] tracking-[0.18em] uppercase",
-                        completion.latenessMinutes > 0 ? "text-rose/85" : "text-foam/55",
+                        completion.latenessMinutes > 0 ? "text-rose/85" : "text-foam/70",
                       )}
                     >
                       {completion.latenessMinutes > 0
