@@ -68,9 +68,9 @@
     return parts.join(",");
   }
   const rng = makeRng(420);
-  const shadowSmall = buildShadow(700, rng);
-  const shadowMedium = buildShadow(200, rng);
-  const shadowBig = buildShadow(100, rng);
+  const shadowSmall = buildShadow(1100, rng);
+  const shadowMedium = buildShadow(350, rng);
+  const shadowBig = buildShadow(160, rng);
   const starStyle = `--cadence-stars-small: ${shadowSmall}; --cadence-stars-medium: ${shadowMedium}; --cadence-stars-big: ${shadowBig};`;
 </script>
 
@@ -81,7 +81,7 @@
     />
     <DialogPrimitive.Content
       class={cn(
-        "cadence-sheet-night fixed z-50 flex flex-col overflow-hidden border border-rule-2 text-foam shadow-2xl ring-0 backdrop-blur-xl outline-none",
+        "cadence-sheet-night fixed z-50 flex flex-col overflow-hidden border border-rule-2 text-foam shadow-2xl ring-0 backdrop-blur-2xl outline-none",
         "bottom-0 left-0 right-0 max-h-[88svh] rounded-t-3xl border-b-0",
         "md:bottom-0 md:top-0 md:right-0 md:left-auto md:h-svh md:max-h-none md:w-full md:max-w-[460px] md:rounded-none md:border-r-0",
         "duration-300 ease-out data-[state=open]:animate-in data-[state=closed]:animate-out",

@@ -327,13 +327,13 @@
 .cadence-sheet-night {
   isolation: isolate;
   background:
-    radial-gradient(ellipse 90% 45% at 50% 0%, oklch(22% 0.05 248 / 0.55) 0%, transparent 70%),
-    radial-gradient(ellipse 80% 60% at 50% 100%, oklch(8% 0.02 220 / 0.7) 0%, transparent 65%),
+    radial-gradient(ellipse 90% 45% at 50% 0%, oklch(22% 0.05 248 / 0.4) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 60% at 50% 100%, oklch(8% 0.02 220 / 0.45) 0%, transparent 65%),
     linear-gradient(
       180deg,
-      oklch(11% 0.028 225 / 0.94) 0%,
-      oklch(7% 0.018 222 / 0.95) 55%,
-      oklch(5% 0.014 218 / 0.96) 100%
+      oklch(11% 0.028 225 / 0.7) 0%,
+      oklch(7% 0.018 222 / 0.78) 55%,
+      oklch(5% 0.014 218 / 0.86) 100%
     );
 }
 
@@ -386,6 +386,7 @@
   border-radius: 1.5px;
   box-shadow: var(--cadence-stars-big);
   animation-duration: 220s;
+  filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.55));
 }
 @keyframes cadence-stars-drift {
   from {
