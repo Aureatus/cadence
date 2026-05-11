@@ -22,6 +22,18 @@
   const hoveredMark = $derived(marks.find((mark) => mark.key === hoveredKey) ?? null);
   const hoveredPoint = $derived(hoveredMark ? polar(hoveredMark.progress, 355) : null);
 
+  // Marks within a small radius of the sun get pushed outward so the halo
+  // doesn't eclipse them — both visually and for hit testing. The lift falls
+  // off linearly so a mark drifting past the sun glides smoothly in and out.
+  function displacedPoint(markProgress: number) {
+    const base = polar(markProgress, 285);
+    const distance = Math.hypot(base.x - nowPoint.x, base.y - nowPoint.y);
+    const threshold = 52;
+    if (distance >= threshold) return base;
+    const closeness = 1 - distance / threshold;
+    return polar(markProgress, 285 + closeness * 30);
+  }
+
   function tickPath(hour: number) {
     const tickProgress = (hour - 6) / 16.5;
     return {
@@ -131,7 +143,7 @@
     stroke-linecap="round"
   />
   {#each marks as mark (mark.key)}
-    {@const point = polar(mark.progress)}
+    {@const point = displacedPoint(mark.progress)}
     {@const interactive = Boolean(mark.todoId)}
     <g
       class={cn("dial-mark", interactive && "focus-visible:outline-none")}
@@ -162,7 +174,11 @@
       {/if}
     </g>
   {/each}
-  <g transform={`translate(${nowPoint.x} ${nowPoint.y})`} filter="url(#glow)">
+  <g
+    transform={`translate(${nowPoint.x} ${nowPoint.y})`}
+    filter="url(#glow)"
+    pointer-events="none"
+  >
     <circle class="dial-sun-halo" r="36" fill="rgba(240,168,144,0.18)" />
     <circle class="dial-sun-halo --delay" r="24" fill="rgba(240,168,144,0.30)" />
     <circle r="14" fill="url(#sun)" />
