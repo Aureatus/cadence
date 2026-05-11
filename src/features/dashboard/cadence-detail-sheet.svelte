@@ -145,15 +145,17 @@
             {/if}
           </div>
 
-          <Button
-            type="button"
-            variant={buttonVariant}
-            size="pill"
-            onclick={logNow}
-            class="w-full justify-center py-3 text-sm tracking-[0.18em]"
-          >
-            {presentation.action} now
-          </Button>
+          <div class="flex md:justify-end">
+            <Button
+              type="button"
+              variant={buttonVariant}
+              size="pill"
+              onclick={logNow}
+              class="w-full justify-center py-3 text-sm tracking-[0.18em] md:w-auto md:min-w-[200px]"
+            >
+              {presentation.action} now
+            </Button>
+          </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div class="rounded-2xl border border-rule bg-[oklch(15%_0.02_220/0.45)] px-4 py-3">
